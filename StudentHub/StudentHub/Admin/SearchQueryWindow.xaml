@@ -1,0 +1,148 @@
+﻿<Window x:Class="StudentHub.Admin.SearchQueryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StudentHub.Admin"
+        mc:Ignorable="d"
+        Title="Search Query" Height="437.705" Width="950">
+
+    <Grid>
+        <!--<Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>-->
+        <TabControl>
+            <TabItem Header="Students" Width="203">
+                <Grid>
+                    <StackPanel Margin="10">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <TextBlock Text="{DynamicResource admin_SearchStudentTextBlock}" Margin="10"/>
+                            <TextBox x:Name="studentNameTextBox" Width="200" Height="30" FontSize="20"/>
+                        </StackPanel>
+                        <StackPanel x:Name="curr_StudentSpecStackPanel" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="Collapsed">
+                            <TextBlock Text="{DynamicResource app_StudentSpecialization}" Width="100"/>
+                            <ComboBox x:Name="opt_SpecializationComboBox"/>
+                        </StackPanel>
+                        <StackPanel x:Name="curr_StudentCourseStackPanel" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="Collapsed">
+                            <TextBlock Text="{DynamicResource app_StudentCourse}" Width="100"/>
+                            <ComboBox x:Name="opt_CourseComboBox"/>
+                        </StackPanel>
+                        <StackPanel x:Name="curr_StudentGroupStackPanel" Orientation="Horizontal" HorizontalAlignment="Center" Visibility="Collapsed">
+                            <TextBlock Text="{DynamicResource app_StudentGroup}" Width="100"/>
+                            <ComboBox x:Name="opt_GroupComboBox"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+                            <Button x:Name="searchStudentButton" Content="{DynamicResource admin_SearchStudent}" Style="{StaticResource MainButtons}" Height="50" Width="170" Foreground="Black" BorderBrush="Black" Background="AntiqueWhite" Click="SearchStudentButton_OnClick"/>
+                        </StackPanel>
+                        <Grid Margin="0,40,0,0" x:Name="studentGrid">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition/>
+                                <ColumnDefinition/>
+                            </Grid.ColumnDefinitions>
+                            <!--<Border Grid.ColumnSpan="2" BorderBrush="Black" BorderThickness="1"/>-->
+                            <StackPanel x:Name="firstColumnStackPanel" Grid.Column="0" Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource app_StudentFIO}" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="curr_studentName" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource app_StudentStatus}" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="curr_studentStatus" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource app_StudentCourse}" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="curr_studentCourse" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource app_StudentGroup}" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="curr_studentGroup" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel x:Name="secondColumnStackPanel" Grid.Column="1" Visibility="Collapsed">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource app_StudentSpecialization}" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="curr_studentSpec" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource app_StudentFaculty}" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="curr_studentFaculty" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource app_StudentBirthday}" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="curr_studentBirthday" Margin="10,0,0,0"/>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{DynamicResource app_Email}" Margin="0,0,0,5"/>
+                                    <TextBlock x:Name="curr_studentEmail" Margin="10,0,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Groups" Width="203">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="160"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <StackPanel HorizontalAlignment="Center" Grid.Column="0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource app_StudentCourse}" Width="100"/>
+                            <ComboBox x:Name="curr_CourseComboBox" Width="150"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource app_StudentGroup}" Width="100"/>
+                            <ComboBox x:Name="curr_GroupComboBox" Width="150"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource app_StudentSpecialization}" Width="100"/>
+                            <ComboBox x:Name="curr_SpecializationComboBox" Width="150"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{DynamicResource app_StudentFaculty}" Width="100"/>
+                            <ComboBox x:Name="curr_FacultyComboBox" Width="150"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5">
+                            <Button x:Name="searchGroupButton" Content="{DynamicResource admin_SearchGroup}" Style="{StaticResource MainButtons}" Height="50" Width="170" Foreground="Black" BorderBrush="Black" Background="AntiqueWhite" Click="SearchGroupButton_OnClick"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1">
+                    <DataGrid x:Name="dg_StudentsOfGroup" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="14" 
+                              BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False"
+                              CanUserResizeRows="False" RowBackground="Transparent" Background="Transparent" IsReadOnly="True"
+                              VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="150" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}"/>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Elders" Width="203">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="100"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <TextBlock Text="{DynamicResource admin_SearchStudentTextBlock}" Margin="10"/>
+                        <TextBox x:Name="elderNameTextBox" Width="200" Height="30" FontSize="20" TextChanged="ElderNameTextBox_OnTextChanged"/>
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5" Orientation="Horizontal">
+                            <Button x:Name="searchElderButton" Content="{DynamicResource admin_SearchElder}" Style="{StaticResource MainButtons}" Height="50" Width="170" Foreground="Black" BorderBrush="Black" Background="AntiqueWhite" Click="SearchElderButton_OnClick"/>
+                            <Button x:Name="searchAllEldersButton" Content="{DynamicResource admin_SearchAllElders}" Style="{StaticResource MainButtons}" Margin="5,0,0,0" Height="50" Width="170" Foreground="Black" BorderBrush="Black" Background="AntiqueWhite" Click="SearchAllEldersButton_OnClick"/>
+                    </StackPanel>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1">
+                    <DataGrid x:Name="dg_Elders" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="14" 
+                              BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False"
+                              CanUserResizeRows="False" RowBackground="Transparent" Background="Transparent" IsReadOnly="True"
+                              VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="150" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}"/>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+
+    </Grid>
+</Window>

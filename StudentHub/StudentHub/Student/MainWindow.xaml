@@ -1,0 +1,105 @@
+﻿<Window x:Class="StudentHub.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StudentHub"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        MouseLeftButtonDown="MainWindow_OnMouseLeftButtonDown"
+        Icon="../Sources/Window/user.ico"
+        Title="Student Hub" Height="650" Width="1000"
+        WindowStyle="None" ResizeMode="NoResize"
+        
+        AllowsTransparency="True" Background="Transparent">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.RowSpan="2" Grid.Column="0" Background="#FFF9CC00"/>
+        <Border Grid.RowSpan="2" Grid.Column="1" Background="White"/>
+        <StackPanel Grid.Column="0">
+            <Image Source="../Sources/Window/sm.png" Width="115"/>
+            <TextBlock Text="Student Hub" FontSize="25" Margin="5" TextAlignment="Center"/>
+            <StackPanel>
+                <Button x:Name="adjustmentButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="AdjustmentButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource m_RequestToAdjustment}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="showInfoButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="ShowInfoButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource m_ShowInformation}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="retakeButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="RetakeButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource m_RequestToRetake}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="putGapsButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Collapsed" Click="PutGapsButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource m_PutGapsBySubjects}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="editInformationButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="EditInformationButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource m_EditInformation}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="setRatingsButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Collapsed" Click="SetRatingsButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource m_SetRatings}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="logOutButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="LogOutButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource m_LogOut}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="exitButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="ExitButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource app_ExitButton}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+        <ScrollViewer Grid.Column="1" >
+            <StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,20">
+                <TextBlock Text="{DynamicResource m_Welcome}" FontSize="30"/>
+                <TextBlock x:Name="studentNameTextBlock" FontSize="30"/>
+            </StackPanel>
+            <TextBlock x:Name="m_ProgressTextBlock" Text="{DynamicResource m_Progress}" FontSize="20" HorizontalAlignment="Center"/>
+            <Separator x:Name="m_ProgressSeparator" Width="70"/>
+            <DataGrid x:Name="dg_Progress" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="20" FontWeight="Light"
+                      BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False" Margin="0,5,0,5"
+                      CanUserResizeRows="False" Width="640" RowBackground="Transparent" Background="Transparent" VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="210" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" IsReadOnly="True">
+            </DataGrid>
+            <TextBlock x:Name="m_AdjustmentTextBlock" Text="{DynamicResource m_Adjustment}" FontSize="20" HorizontalAlignment="Center"/>
+            <Separator x:Name="m_AdjustmentSeparator" Width="105"/>
+            <DataGrid x:Name="dg_Adjustments" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="20" FontWeight="Light"
+                      BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False"
+                      CanUserResizeRows="False" Width="640" RowBackground="Transparent" Background="Transparent" VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="210" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" IsReadOnly="True">
+            </DataGrid>
+            <TextBlock x:Name="m_RetakeTextBlock" Text="{DynamicResource m_Retake}" FontSize="20" HorizontalAlignment="Center"/>
+            <Separator x:Name="m_RetakeSeparator" Width="60"/>
+            <DataGrid x:Name="dg_Retakes" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="20" FontWeight="Light"
+                      BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False" Margin="0,5,0,0"
+                      CanUserResizeRows="False" Width="640" RowBackground="Transparent" Background="Transparent" VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="210" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" IsReadOnly="True">
+            </DataGrid>
+        </StackPanel>
+            </ScrollViewer>
+    </Grid> 
+</Window>

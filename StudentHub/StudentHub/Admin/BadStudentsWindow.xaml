@@ -1,0 +1,20 @@
+﻿<Window x:Class="StudentHub.Admin.BadStudentsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StudentHub.Admin"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Bad students with gaps more 30" Height="600" Width="1300">
+    <Grid>
+        <StackPanel>
+            <TextBlock FontSize="30" TextAlignment="Center" Text="{DynamicResource admin_BadStudents}"/>
+            <DataGrid x:Name="dg_BadStudents" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="18" 
+                      BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False"
+                      CanUserResizeRows="False" Width="1250" RowBackground="Transparent" Background="Transparent" 
+                      VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="150" 
+                      ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" HorizontalAlignment="Center" IsReadOnly="True"/>
+        </StackPanel>
+    </Grid>
+</Window>

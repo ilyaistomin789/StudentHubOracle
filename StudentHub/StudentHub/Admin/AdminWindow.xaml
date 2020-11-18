@@ -1,0 +1,117 @@
+﻿<Window x:Class="StudentHub.AdminWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StudentHub"
+        mc:Ignorable="d"
+        Icon="../Sources/Window/preferences-desktop-user.ico"
+        WindowStartupLocation="CenterScreen"
+        MouseLeftButtonDown="AdminWindow_OnMouseLeftButtonDown"
+        Title="Admin Window" Height="750" Width="1000"
+        WindowStyle="None" ResizeMode="NoResize"
+        
+        AllowsTransparency="True" Background="Transparent">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.RowSpan="2" Grid.Column="0" Background="#FF2BABE6"/>
+        <Border Grid.RowSpan="2" Grid.Column="1" Background="White"/>
+
+            <StackPanel Grid.Column="0">
+                <Image Source="../Sources/Window/sm.png" Width="115"/>
+                <TextBlock Text="Student Hub Admin" FontSize="25" TextAlignment="Center"/>
+                <StackPanel>
+                <Button HorizontalContentAlignment="Left" x:Name="adjustmentWorkButton" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="AdjustmentWorkButton_OnClick">
+                    <TextBlock Text="{DynamicResource admin_AdjustmentWork}"/>
+                </Button>
+                <Button x:Name="gapsWorkButton" Style="{StaticResource LauncherButtons}" HorizontalContentAlignment="Left" Height="50" Margin="3,10,3,0" Click="GapsWorkButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource admin_GapsWork}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="retakeWorkButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="RetakeWorkButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource admin_RetakeWork}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="searchQueryButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="SearchQueryButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource admin_SearchQuery}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="studentProgressButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="StudentProgressButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource admin_StudentProgress}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="reportButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="ReportButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource admin_ReportWork}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="emailButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="EmailButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource admin_EmailGeneration}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="logOutButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="LogOutButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource m_LogOut}"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="exitButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="ExitButton_OnClick">
+                    <StackPanel>
+                        <Image/>
+                        <TextBlock Text="{DynamicResource app_ExitButton}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="1">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <TextBlock Text="{DynamicResource m_Welcome}" FontSize="30"/>
+                <TextBlock x:Name="adminNameTextBlock" FontSize="30"/>
+            </StackPanel>
+            <StackPanel x:Name="reportStackPanel" Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Processed Adjustments: " Margin="5"/>
+                    <TextBlock x:Name="processedAdjustments" Margin="5"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Raw Adjustments: " Margin="5"/>
+                    <TextBlock x:Name="rawAdjustments" Margin="5"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Processed Retakes: " Margin="5"/>
+                    <TextBlock x:Name="processedRetakes" Margin="5"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Raw Retakes: " Margin="5"/>
+                    <TextBlock x:Name="rawRetakes" Margin="5"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Count of authorized users: " Margin="5"/>
+                    <TextBlock x:Name="countOfUsers" Margin="5"/>
+                </StackPanel>
+                <ScrollViewer>
+                    <DataGrid x:Name="dg_Students" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="16" FontWeight="Light"
+                              BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False" Margin="0,5,0,5"
+                              CanUserResizeRows="False" Width="640" RowBackground="Transparent" Background="Transparent" VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="210" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" IsReadOnly="True">
+                    </DataGrid>
+                </ScrollViewer>
+            </StackPanel>
+            
+        </StackPanel>
+    </Grid>
+</Window>
