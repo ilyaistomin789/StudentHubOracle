@@ -104,7 +104,6 @@ namespace StudentHub.Account
                     if (currentUser.Role == ue.STUDENT_ROLE)
                     {
                         _window = new MainWindow(currentUser);
-                        _window.Show();
                     }
 
                     if (currentUser.Role == ue.DEANERY_ROLE)

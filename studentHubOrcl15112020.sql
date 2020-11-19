@@ -179,7 +179,7 @@ END;
 CREATE TABLE subjects (
 id number,
 subject CHAR(20) DEFAULT NULL NULL,
-name VARCHAR2(50) DEFAULT NULL NULL,
+name VARCHAR2(200) DEFAULT NULL NULL,
 faculty CHAR(10) DEFAULT NULL NULL,
 PRIMARY KEY (subject)
 );
@@ -239,7 +239,7 @@ END;
 CREATE TABLE faculty (
 id number,
 faculty CHAR(10) DEFAULT NULL NULL,
-name NUMBER(10) DEFAULT NULL NULL,
+name varchar2(80) DEFAULT NULL NULL,
 PRIMARY KEY (faculty)
 );
 -- Generate ID using sequence and trigger
@@ -392,8 +392,8 @@ CREATE TABLE timetable (
   id NUMBER(10) DEFAULT NULL NULL,
   teacher_id NUMBER(10) DEFAULT NULL NULL,
   subject CHAR(20) DEFAULT NULL NULL,
-  start_time varchar2(4) DEFAULT NULL NULL,
-  end_time varchar2(4) DEFAULT NULL NULL,
+  start_time varchar2(30) DEFAULT NULL NULL,
+  end_time varchar2(30) DEFAULT NULL NULL,
   PRIMARY KEY (id)
 );
 -- Generate ID using sequence and trigger
@@ -419,7 +419,6 @@ ALTER TABLE student_info ADD FOREIGN KEY (specialization) REFERENCES specializat
 ALTER TABLE student_progress ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE student_progress ADD FOREIGN KEY (subject) REFERENCES subjects (subject);
 ALTER TABLE subjects ADD FOREIGN KEY (faculty) REFERENCES faculty (faculty);
-ALTER TABLE faculty ADD FOREIGN KEY (specialization) REFERENCES specialization (specialization);
 ALTER TABLE adjustments ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE adjustments ADD FOREIGN KEY (subject) REFERENCES subjects (subject);
 ALTER TABLE adjustments ADD FOREIGN KEY (teacher_id) REFERENCES users (id);
@@ -429,8 +428,8 @@ ALTER TABLE retakes ADD FOREIGN KEY (teacher_id) REFERENCES users (id);
 ALTER TABLE gaps ADD FOREIGN KEY (user_id) REFERENCES users (id);
 ALTER TABLE gaps ADD FOREIGN KEY (subject) REFERENCES subjects (subject);
 ALTER TABLE timetable ADD FOREIGN KEY (teacher_id) REFERENCES users (id);
-ALTER TABLE faculty_specialization ADD FOREIGN KEY (faculty) references faculty (faculty);
-ALTER TABLE faculty_specialization ADD FOREIGN KEY (specialization) references specialization (specialization) ;
+ALTER TABLE faculty_specialization add foreign key (specialization) references specialization(specialization);
+ALTER TABLE faculty_specialization add foreign key (faculty) references faculty(faculty);
 -- ----
 -- FUNCTIONS AND PROCEDURES
 -- ----
@@ -499,6 +498,104 @@ end if;
 exception when curr_student_not_exists then DBMS_OUTPUT.PUT_LINE('error when searching for information');
 end findStudent;
 
+CREATE OR REPLACE PROCEDURE updateStudent(in_user_id users.id%type, in_student_name student_info.student_name%type,
+in_course student_info.course%type, in_num_group student_info.num_group%type, in_specialization student_info.specialization%type, in_faculty student_info.faculty%type,
+in_birthday student_info.birthday%type, new_user out sys_refcursor)
+is
+begin
+    update student_info set student_name = in_student_name, course = in_course, num_group = in_num_group, specialization = in_specialization, faculty = in_faculty,
+    birthday = in_birthday where user_id = in_user_id;
+    commit;
+    open new_user for select * from student_info where user_id = in_user_id;
+end updateStudent;
+    select * from student_info;
+select * from student_progress;
+select * from adjustments;
+select * from retakes;
 
-select * from users;
-select * from student_info;
+-- ----
+-- INSERTS
+-- ----
+insert all
+    into  Faculty(Faculty, name) values	('ХТиТ', 'Химическая технология и техника')
+	into  Faculty(Faculty, name) values ('ЛХФ', 'Лесохозяйственный факультет')
+	into  Faculty(Faculty, name) values	('ИЭФ', 'Инженерно-экономический факультет')
+	into  Faculty(Faculty, name) values('ТТЛП', 'Технология и техника лесной промышленности')
+	into  Faculty(Faculty, name) values('ТОВ', 'Технология органических веществ')
+	into  Faculty(Faculty, name) values('ИТ', 'Факультет информационных технологий')
+	into  Faculty(Faculty, name) values('ИДиП', 'Издательское дело и полиграфия')
+	SELECT * from dual;
+select * from subjects;
+commit;
+select specialization from specialization;
+insert all
+    into subjects (subject, name, faculty) values ('СУБД', 'Системы управления базами данных', 'ИТ')
+	into subjects (subject, name, faculty) values ('ООТПиСП', 'Объектно-ориентированные технологии программирования и структуры проектирвоания', 'ИТ')
+	into subjects (subject, name, faculty) values ('СТПВI', 'Современные технологии программирования в Internet', 'ИТ')
+	into subjects (subject, name, faculty) values ('БД', 'Базы данных','ИТ')
+	into subjects (subject, name, faculty) values ('ИНФ', 'Информационные технологии','ИТ')
+	into subjects (subject, name, faculty) values ('ОАиП', 'Основы алгоритмизации и программирования', 'ИТ')
+	into subjects (subject, name, faculty) values ('ПЗ', 'Представление знаний в компьютерных системах', 'ИТ')
+	into subjects (subject, name, faculty) values ('ПСП', 'Программирование сетевых приложений','ИТ')
+	into subjects (subject, name, faculty) values ('МСОИ', 'Моделирование систем обработки информации', 'ИТ')
+	into subjects (subject, name, faculty) values ('ПИС', 'Проектирование информационных систем', 'ИТ')
+	into subjects (subject, name, faculty) values ('КГ', 'Компьютерная геометрия ','ИТ')
+	into subjects (subject, name, faculty) values ('ПМАПЛ', 'Полиграф. машины, автоматы и поточные линии', 'ИДиП')
+	into subjects (subject, name, faculty) values ('КМС', 'Компьютерные мультимедийные системы', 'ИТ')
+	into subjects (subject, name, faculty) values ('ОПП', 'Организация полиграф. производства', 'ИДиП')
+	into subjects (subject, name, faculty) values ('ДМ', 'Дискретная математика', 'ИТ')
+	into subjects (subject, name, faculty) values ('МП', 'Математическое программирование','ИТ')
+	into subjects (subject, name, faculty) values ('ЛЭВМ', 'Логические основы ЭВМ',  'ИТ')
+	into subjects (subject, name, faculty) values ('ООП', 'Объектно-ориентированное программирование', 'ИТ')
+	into subjects (subject, name, faculty) values ('ЭП', 'Экономика природопользования','ИЭФ')
+	into subjects (subject, name, faculty) values ('ЭТ', 'Экономическая теория','ИЭФ')
+	into subjects (subject, name, faculty) values ('БЛЗиПсOO','Биология лесных зверей и птиц с осн. охотов.','ЛХФ')
+	into subjects (subject, name, faculty) values ('ОСПиЛПХ','Основы садово-паркового и лесопаркового хозяйства',  'ЛХФ')
+	into subjects (subject, name, faculty) values ('ИГ', 'Инженерная геодезия ','ЛХФ')
+	into subjects (subject, name, faculty) values ('ЛВ', 'Лесоводство', 'ЛХФ')
+	into subjects (subject, name, faculty) values ('ОХ', 'Органическая химия', 'ТОВ')
+	into subjects (subject, name, faculty) values ('ВТЛ', 'Водный транспорт леса','ТТЛП')
+	into subjects (subject, name, faculty) values ('ТиОЛ', 'Технология и оборудование лесозаготовок', 'ТТЛП')
+	into subjects (subject, name, faculty) values ('ТОПИ', 'Технология обогащения полезных ископаемых ','ХТиТ')
+	select * from dual;
+
+insert all
+    into specialization(specialization, name) values ('ПОИТ',null)
+	into specialization(specialization, name) values ('ИСИТ',null)
+	into specialization(specialization, name) values ('ДЭИВИ',null)
+	into specialization(specialization, name) values ('ПОИБМС',null)
+	into specialization(specialization, name) values ('ИД',null)
+	into specialization(specialization, name) values ('ПОиСОИ',null)
+	into specialization(specialization, name) values ('КиПИИКМ',null)
+	into specialization(specialization, name) values ('МиАХПиПСМ',null)
+	into specialization(specialization, name) values ('ЛХ',null)
+	into specialization(specialization, name) values ('СПС',null)
+	into specialization(specialization, name) values ('ТиП',null)
+	into specialization(specialization, name) values ('ЭиУНП',null)
+	into specialization(specialization, name) values ('БУАиА',null)
+	into specialization(specialization, name) values ('МиОЛК',null)
+	into specialization(specialization, name) values ('ЛД',null)
+	into specialization(specialization, name) values ('ХТОВ',null)
+	into specialization(specialization, name) values ('ХТПД',null)
+	into specialization(specialization, name) values ('ФХМиПККП',null)
+	SELECT * from dual;
+insert all
+    into faculty_specialization(specialization, faculty) values	('ПОИТ','ИТ')
+	into faculty_specialization(specialization, faculty) values	('ИСИТ','ИТ')
+	into faculty_specialization(specialization, faculty) values	('ДЭИВИ','ИТ')
+	into faculty_specialization(specialization, faculty) values	('ПОИБМС','ИТ')
+	into faculty_specialization(specialization, faculty) values	('ИД','ИДиП')
+	into faculty_specialization(specialization, faculty) values	('ПОиСОИ','ИДиП')
+	into faculty_specialization(specialization, faculty) values	('КиПИИКМ','ХТиТ')
+	into faculty_specialization(specialization, faculty) values	('МиАХПиПСМ','ХТиТ')
+	into faculty_specialization(specialization, faculty) values	('ЛХ','ЛХФ')
+	into faculty_specialization(specialization, faculty) values	('СПС','ЛХФ')
+	into faculty_specialization(specialization, faculty) values	('ТиП','ЛХФ')
+	into faculty_specialization(specialization, faculty) values	('ЭиУНП','ИЭФ')
+	into faculty_specialization(specialization, faculty) values	('БУАиА','ИЭФ')
+	into faculty_specialization(specialization, faculty) values	('МиОЛК','ТТЛП')
+	into faculty_specialization(specialization, faculty) values	('ЛД','ТТЛП')
+	into faculty_specialization(specialization, faculty) values	('ХТОВ','ТОВ')
+	into faculty_specialization(specialization, faculty) values	('ХТПД','ТОВ')
+	into faculty_specialization(specialization, faculty) values	('ФХМиПККП','ТОВ')
+	select * from dual;

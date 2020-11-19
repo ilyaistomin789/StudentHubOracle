@@ -3,6 +3,8 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Controls;
+using Oracle.ManagedDataAccess.Client;
 using StudentHub.DataBase;
 using StudentHub.University;
 
@@ -15,9 +17,9 @@ namespace StudentHub
     {
         private Student _student;
         private readonly UniversityEssence university = UniversityEssence.GetInstance();
-        //TODO DO EDITING 
         public EditWindow(Student student)
         {
+            _student = student;
             InitializeComponent();
             InitializeComboBox();
             e_fioTextBox.Text = student.Name!;
@@ -25,7 +27,7 @@ namespace StudentHub
             e_specializationComboBox.Text = student.Specialization;
             e_courseComboBox.Text = student.Course.ToString();
             e_groupComboBox.Text = student.Group.ToString();
-            if (student.Birthday == null)
+            if (student.Birthday == String.Empty)
             {
                 e_birthdayCalendar.SelectedDate = null;
             }
@@ -34,39 +36,31 @@ namespace StudentHub
                 e_birthdayCalendar.SelectedDate = DateTime.Parse(student.Birthday);
             }
         }
-        //TODO FIX 
+
+        private void GetInfoFromTables(string cmdText,string element , ComboBox cb, OracleConnection connection)
+        {
+            using (OracleCommand command = new OracleCommand(cmdText, connection))
+            {
+                command.CommandType = CommandType.Text;
+                var reader = command.ExecuteReader();
+                DataTable dt = new DataTable();
+                dt.Load(reader);
+                foreach (DataRow row in dt.Rows)
+                {
+                    cb.Items.Add(row[element].ToString());
+                }
+            }
+        }
         private void InitializeComboBox()
         {
-            string getSpecQuery = "SELECT Specialization FROM Specialization";
-            string getFacultyQuery = "Select Faculty FROM Faculty";
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
                     connection.Open();
-                    SqlCommand getSpecCommand = new SqlCommand(getSpecQuery,connection);
-                    SqlCommand getFacultyCommand = new SqlCommand(getFacultyQuery,connection);
-                    getSpecCommand.CommandType = CommandType.Text;
-                    getFacultyCommand.CommandType = CommandType.Text;
-                    var specializations = getSpecCommand.ExecuteReader();
-                    if (specializations.HasRows)
-                    {
-                        while (specializations.Read())
-                        {
-                            e_specializationComboBox.Items.Add(specializations.GetString(0));
-                        }
-                        specializations.Close();
-                    }
-                    var faculties = getFacultyCommand.ExecuteReader();
-                    if (faculties.HasRows)
-                    {
-                        while (faculties.Read())
-                        {
-                            e_facultyComboBox.Items.Add(faculties.GetString(0));
-                        }
-                        faculties.Close();
-                    }
-
+                    GetInfoFromTables("select specialization from specialization", "specialization",e_specializationComboBox, connection);
+                    GetInfoFromTables("select faculty from faculty","faculty",e_facultyComboBox, connection);
+                    connection.Close();
                     foreach (var t in university.courses)
                     {
                         e_courseComboBox.Items.Add(t);
@@ -84,81 +78,86 @@ namespace StudentHub
                 throw;
             }
         }
-
         private void E_editInformationButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (!Regex.IsMatch(e_fioTextBox.Text,"^[a-zA-Z\\s]{2,39}$"))
-            {
-                MessageBox.Show("Incorrect Student FIO");
-                return;
-            }
-            string setStudentFieldsProcedure = "SET_STUDENT_FIELDS";
             try
             {
-                //OracleDataBaseConnection.ApplyUserPrivileges();
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
                     connection.Open();
-                    SqlCommand setStudentFieldsCommand = new SqlCommand(setStudentFieldsProcedure, connection);
-                    setStudentFieldsCommand.CommandType = CommandType.StoredProcedure;
-                    SqlParameter studentIdParameter = new SqlParameter
+                    OracleParameter userId = new OracleParameter
                     {
-                        ParameterName = "@StudentId",
-                        Value = _student.StudentId
+                        ParameterName = "in_user_id",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Int64,
+                        Value = _student.UserId
                     };
-                    SqlParameter studentNameParameter = new SqlParameter
+                    OracleParameter name = new OracleParameter
                     {
-                        ParameterName = "@StudentName",
+                        ParameterName = "in_student_name",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
                         Value = e_fioTextBox.Text
                     };
-                    SqlParameter courseParameter = new SqlParameter
+                    OracleParameter course = new OracleParameter
                     {
-                        ParameterName = "@Course",
+                        ParameterName = "in_course",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Int64,
                         Value = Convert.ToInt32(e_courseComboBox.Text)
                     };
-                    SqlParameter groupIdParameter = new SqlParameter
+                    OracleParameter numGroup = new OracleParameter
                     {
-                        ParameterName = "@GroupId",
+                        ParameterName = "in_num_group",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Int64,
                         Value = Convert.ToInt32(e_groupComboBox.Text)
                     };
-                    SqlParameter specParameter = new SqlParameter
+                    OracleParameter specialization = new OracleParameter
                     {
-                        ParameterName = "@Specialization",
+                        ParameterName = "in_specialization",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
                         Value = e_specializationComboBox.Text
                     };
-                    SqlParameter facultyParameter = new SqlParameter
+                    OracleParameter faculty = new OracleParameter
                     {
-                        ParameterName = "@Faculty",
+                        ParameterName = "in_faculty",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
                         Value = e_facultyComboBox.Text
                     };
-                    SqlParameter birthdayParameter = new SqlParameter
+                    OracleParameter birthday = new OracleParameter
                     {
-                        ParameterName = "@Birthday",
+                        ParameterName = "in_birthday",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Date,
                         Value = e_birthdayCalendar.SelectedDate.Value
                     };
-
-                    setStudentFieldsCommand.Parameters.Add(studentIdParameter);
-                    setStudentFieldsCommand.Parameters.Add(studentNameParameter);
-                    setStudentFieldsCommand.Parameters.Add(courseParameter);
-                    setStudentFieldsCommand.Parameters.Add(groupIdParameter);
-                    setStudentFieldsCommand.Parameters.Add(specParameter);
-                    setStudentFieldsCommand.Parameters.Add(facultyParameter);
-                    setStudentFieldsCommand.Parameters.Add(birthdayParameter);
-                    var done = setStudentFieldsCommand.ExecuteReader();
-                    if (done.HasRows)
+                    OracleParameter newUser = new OracleParameter
                     {
-                        while (done.Read())
+                        ParameterName = "new_user",
+                        Direction = ParameterDirection.Output,
+                        OracleDbType = OracleDbType.RefCursor
+                    };
+                    using (OracleCommand command = new OracleCommand("updateStudent", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddRange(new OracleParameter[] {userId,name,course,numGroup,specialization,faculty,birthday,newUser});
+                        var reader = command.ExecuteReader();
+                        DataTable dt = new DataTable();
+                        dt.Load(reader);
+                        foreach (DataRow row in dt.Rows)
                         {
-                            _student.Name = done.GetString(2);
-                            _student.Course = done.GetInt32(4);
-                            _student.Group = done.GetInt32(5);
-                            _student.Specialization = done.GetString(6);
-                            _student.Faculty = done.GetString(7);
-                            _student.Birthday = done.GetDateTime(8).ToString("d");
+                            _student.Name = row["student_name"].ToString();
+                            _student.Course = int.Parse(row["course"].ToString());
+                            _student.Group = int.Parse(row["num_group"].ToString());
+                            _student.Specialization = row["specialization"].ToString();
+                            _student.Faculty = row["faculty"].ToString();
+                            _student.Birthday = row["birthday"].ToString();
                         }
-                        done.Close();
                     }
-                    
+                    connection.Close();
                     MessageBox.Show("Done");
                 }
             }

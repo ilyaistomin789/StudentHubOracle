@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Oracle.ManagedDataAccess.Client;
 using StudentHub.Account;
@@ -29,7 +30,7 @@ namespace StudentHub
                 putGapsButton.Visibility = Visibility.Visible;
                 setRatingsButton.Visibility = Visibility.Visible;
             }
-
+            //TODO FIX WINDOWS 
             if (_student.Name == String.Empty)
             {
                 MessageBox.Show("Please, enter information about yourself");
@@ -37,9 +38,10 @@ namespace StudentHub
                 _window.Show();
             }
             studentNameTextBlock.Text = " " + _student.Name;
-            //TODO GET RET,ADJ,SCOPES
+            GetStudentRatings();
+            GetRetakeAndAdjustment();
 
-
+            this.Show();
         }
         public MainWindow()
         {
@@ -132,39 +134,39 @@ namespace StudentHub
 
         private void GetStudentRatings()
         {
-            string getRatingsQuery = "SELECT SubjectName [Subject], convert(varchar,PDate,104) [Date of issue], Note FROM Progress where StudentId = @StudentId";
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
                     connection.Open();
-                    SqlCommand getRatingsCommand = new SqlCommand(getRatingsQuery, connection);
-                    getRatingsCommand.CommandType = CommandType.Text;
-                    SqlParameter studentIdParameter = new SqlParameter
+                    OracleParameter userId = new OracleParameter
                     {
-                        ParameterName = "@StudentId",
-                        Value = _student.StudentId
+                        ParameterName = "in_user_id",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Int64,
+                        Value = _student.UserId
                     };
-                    getRatingsCommand.Parameters.Add(studentIdParameter);
-                    var hasProgress = getRatingsCommand.ExecuteReader();
-                    if (hasProgress.HasRows)
+                    using (OracleCommand command = new OracleCommand("select subject, note, progress_date from student_progress where user_id = :in_user_id", connection))
                     {
-                        hasProgress.Close();
-                        getRatingsCommand.ExecuteNonQuery();
-                        SqlDataAdapter dataAdapter = new SqlDataAdapter(getRatingsCommand);
-                        DataTable dt = new DataTable("Progress");
-                        dataAdapter.Fill(dt);
-                        dg_Progress.ItemsSource = dt.DefaultView;
-                        dataAdapter.Update(dt);
+                        command.CommandType = CommandType.Text;
+                        command.Parameters.Add(userId);
+                        var reader = command.ExecuteReader();
+                        if (reader.HasRows)
+                        {
+                            DataTable dt = new DataTable();
+                            OracleDataAdapter oda = new OracleDataAdapter(command);
+                            oda.Fill(dt);
+                            dg_Progress.ItemsSource = dt.DefaultView;
+                            oda.Update(dt);
+                        }
+                        else
+                        {
+                            m_ProgressTextBlock.Visibility = Visibility.Collapsed;
+                            m_ProgressSeparator.Visibility = Visibility.Collapsed;
+                            dg_Progress.Visibility = Visibility.Collapsed;
+                        }
                     }
-                    else
-                    {
-                        hasProgress.Close();
-                        m_ProgressTextBlock.Visibility = Visibility.Collapsed;
-                        m_ProgressSeparator.Visibility = Visibility.Collapsed;
-                        dg_Progress.Visibility = Visibility.Collapsed;
-
-                    }
+                    connection.Close();
                 }
             }
             catch (Exception e)
@@ -173,75 +175,56 @@ namespace StudentHub
             }
         }
 
+        private void LoadRetakesAndAdjustmentFromTables(string cmdText,OracleConnection connection, OracleParameter op, TextBlock tb, Separator s, DataGrid dg)
+        {
+            using (OracleCommand command = new OracleCommand(cmdText,connection))
+            {
+                command.Parameters.Add(op);
+                var reader = command.ExecuteReader();
+                if (reader.HasRows)
+                {
+                    OracleDataAdapter oda = new OracleDataAdapter(command);
+                    DataTable dt = new DataTable();
+                    oda.Fill(dt);
+                    dg.ItemsSource = dt.DefaultView;
+                    oda.Update(dt);
+                }
+                else
+                {
+                    tb.Visibility = Visibility.Collapsed;
+                    s.Visibility = Visibility.Collapsed;
+                    dg.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
+
         private void GetRetakeAndAdjustment()
         {
-            string getRetakeQuery =
-                "SELECT SubjectName,CASE when RetakeStatus = 0 then 'In processing' when RetakeStatus = 1 then 'Request rejected' when RetakeStatus = 2 then 'Request accepted' END Status, convert(varchar,RDate,104) [Date of retake] FROM Retake where StudentId = @StudentId";
-            string getAdjustmentQuery = "SELECT SubjectName,CASE when AdjustmentStatus = 0 then 'In processing' when AdjustmentStatus = 1 then 'Request rejected' when AdjustmentStatus = 2 then 'Request accepted' END Status, convert(varchar,ADate,104) [Date of adjustment] FROM Adjustment where StudentId = @StudentId";
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
                     connection.Open();
-                    SqlCommand getAdjustmentCommand = new SqlCommand(getAdjustmentQuery,connection);
-                    SqlCommand getRetakeCommand = new SqlCommand(getRetakeQuery,connection);
-                    getRetakeCommand.CommandType = CommandType.Text;
-                    getAdjustmentCommand.CommandType = CommandType.Text;
-                    SqlParameter rStudentIdParameter = new SqlParameter
+                    OracleParameter userId = new OracleParameter
                     {
-                        ParameterName = "@StudentId",
-                        Value = _student.StudentId
+                        ParameterName = "in_user_id",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Int64,
+                        Value = _student.UserId
                     };
-                    SqlParameter aStudentIdParameter = new SqlParameter
-                    {
-                        ParameterName = "@StudentId",
-                        Value = _student.StudentId
-                    };
-                    getRetakeCommand.Parameters.Add(rStudentIdParameter);
-                    getAdjustmentCommand.Parameters.Add(aStudentIdParameter);
-                    var hasAdjustment = getAdjustmentCommand.ExecuteReader();
-                    if (hasAdjustment.HasRows)
-                    {
-                        hasAdjustment.Close();
-                        getAdjustmentCommand.ExecuteNonQuery();
-                        SqlDataAdapter adjustmentDataAdapter = new SqlDataAdapter(getAdjustmentCommand);
-                        DataTable dt1 = new DataTable("Adjustment");
-                        adjustmentDataAdapter.Fill(dt1);
-                        dg_Adjustments.ItemsSource = dt1.DefaultView;
-                        adjustmentDataAdapter.Update(dt1);
-                    }
-                    else
-                    {
-                        hasAdjustment.Close();
-                        m_AdjustmentTextBlock.Visibility = Visibility.Collapsed;
-                        m_AdjustmentSeparator.Visibility = Visibility.Collapsed;
-                        dg_Adjustments.Visibility = Visibility.Collapsed;
-                    }
-                    var hasRetakes = getRetakeCommand.ExecuteReader();
-                    if (hasRetakes.HasRows)
-                    {
-                        hasRetakes.Close();
-                        getRetakeCommand.ExecuteNonQuery();
-                        SqlDataAdapter retakeDataAdapter = new SqlDataAdapter(getRetakeCommand);
-                        DataTable dt2 = new DataTable("Retake");
-                        retakeDataAdapter.Fill(dt2);
-                        dg_Retakes.ItemsSource = dt2.DefaultView;
-                        retakeDataAdapter.Update(dt2);
-                    }
-                    else
-                    {
-                        hasRetakes.Close();
-                        m_RetakeTextBlock.Visibility = Visibility.Collapsed;
-                        m_RetakeSeparator.Visibility = Visibility.Collapsed;
-                        dg_Retakes.Visibility = Visibility.Collapsed;
-                    }
+                    LoadRetakesAndAdjustmentFromTables("select subject, status, adjustment_date, access_date from adjustments where user_id = :in_user_id",
+                        connection,userId,m_AdjustmentTextBlock,m_AdjustmentSeparator,dg_Adjustments);
+                    
+                    LoadRetakesAndAdjustmentFromTables("select subject, status, retake_date, access_date from retakes where user_id = :in_user_id",
+                        connection, userId.Clone() as OracleParameter, m_RetakeTextBlock, m_RetakeSeparator, dg_Retakes);
+                    connection.Close();
                 }
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.Message);
+                throw;
             }
-
         }
 
         private void MainWindow_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e) => this.DragMove();

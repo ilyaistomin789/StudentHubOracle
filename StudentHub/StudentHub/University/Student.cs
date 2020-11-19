@@ -9,8 +9,8 @@ namespace StudentHub.University
 {
     public class Student
     {
-        public long StudentId { get; set; }
-        public long UserId { get; set; }
+        public int StudentId { get; set; }
+        public int UserId { get; set; }
         public string? StudentStatus { get; set; }
         public string? Name { get; set; }
         public string? Birthday { get; set; }
