@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Oracle.ManagedDataAccess.Client;
 using StudentHub.Account;
 using StudentHub.Admin;
 using StudentHub.DataBase;
@@ -27,16 +28,53 @@ namespace StudentHub
     {
         private Window _window;
         private User _user = new User();
-        public AdminWindow(string adminName)
-        {
-            InitializeComponent();
-            adminNameTextBlock.Text = ' ' +  adminName;
-        }
+        private Deanery _deanery = new Deanery();
 
         public AdminWindow(User user)
         {
             InitializeComponent();
             this._user = user;
+            FindDeanery(_user.UserId);
+            deaneryTextBlock.Text = ' ' + _user.UserName;
+        }
+
+        private void FindDeanery(int userId)
+        {
+            using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
+            {
+                OracleParameter userIdParameter = new OracleParameter
+                {
+                    ParameterName = "in_user_id",
+                    Direction = ParameterDirection.Input,
+                    OracleDbType = OracleDbType.Int64,
+                    Value = userId
+                };
+                OracleParameter deanery = new OracleParameter
+                {
+                    ParameterName = "deanery",
+                    Direction = ParameterDirection.Output,
+                    OracleDbType = OracleDbType.RefCursor
+
+                };
+                connection.Open();
+                using (OracleCommand command = new OracleCommand("findDeanery", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddRange(new OracleParameter[] {userIdParameter,deanery});
+                    var reader = command.ExecuteReader();
+                    DataTable dt = new DataTable();
+                    dt.Load(reader);
+                    foreach (DataRow row in dt.Rows)
+                    {
+                        _deanery.UserId = int.Parse(row["user_id"].ToString());
+                        _deanery.DeaneryId = int.Parse(row["id"].ToString());
+                        _deanery.DeaneryName = row["deanery_name"].ToString();
+                        _deanery.Faculty = row["faculty"].ToString();
+                        _deanery.Telephone = row["telephone"].ToString();
+                    }
+                }
+                connection.Close();
+            }
         }
 
 
@@ -59,11 +97,6 @@ namespace StudentHub
             _window.Show();
         }
 
-        private void SearchQueryButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            _window = new SearchQueryWindow();
-            _window.Show();
-        }
 
         private void StudentProgressButton_OnClick(object sender, RoutedEventArgs e)
         {
@@ -71,58 +104,6 @@ namespace StudentHub
             _window.Show();
         }
 
-        private void ReportButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            reportStackPanel.Visibility = Visibility.Visible;
-            string processedAdjustments =
-                "SELECT COUNT(*) FROM Adjustment where AdjustmentStatus = 1 OR AdjustmentStatus = 2 ";
-            string rawAdjustments = "SELECT COUNT(*) FROM Adjustment where AdjustmentStatus = 0";
-            string processedRetakes = "SELECT COUNT(*) FROM Retake where RetakeStatus = 1 OR RetakeStatus = 2";
-            string rawRetakes = "SELECT COUNT(*) FROM Retake where RetakeStatus = 0";
-            string countOfUsers = "SELECT COUNT(*) FROM Users";
-            string getStudentsQuery =
-                "SELECT StudentName [Student], Course, GroupId [Group], Faculty, Specialization, convert(varchar,Birthday,104) [Birthday] FROM Student";
-            try
-            {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
-                {
-                    connection.Open();
-                    SqlCommand getProcessedAdjustmentsCommand = new SqlCommand(processedAdjustments,connection);
-                    SqlCommand getRawAdjustmentsCommand = new SqlCommand(rawAdjustments,connection);
-                    SqlCommand getProcessedRetakesCommand = new SqlCommand(processedRetakes,connection);
-                    SqlCommand getRawRetakesCommand = new SqlCommand(rawRetakes,connection);
-                    SqlCommand getCountUsersCommand = new SqlCommand(countOfUsers,connection);
-                    SqlCommand getStudents = new SqlCommand(getStudentsQuery,connection);
-                    getProcessedAdjustmentsCommand.CommandType = CommandType.Text;
-                    getRawAdjustmentsCommand.CommandType = CommandType.Text;
-                    getProcessedRetakesCommand.CommandType = CommandType.Text;
-                    getRawRetakesCommand.CommandType = CommandType.Text;
-                    getCountUsersCommand.CommandType = CommandType.Text;
-                    getStudents.CommandType = CommandType.Text;
-                    this.processedAdjustments.Text = getProcessedAdjustmentsCommand.ExecuteScalar().ToString();
-                    this.rawAdjustments.Text = getRawAdjustmentsCommand.ExecuteScalar().ToString();
-                    this.processedRetakes.Text = getProcessedRetakesCommand.ExecuteScalar().ToString();
-                    this.rawRetakes.Text = getRawRetakesCommand.ExecuteScalar().ToString();
-                    this.countOfUsers.Text = getCountUsersCommand.ExecuteScalar().ToString();
-                    getStudents.ExecuteNonQuery();
-                    SqlDataAdapter studentDataAdapter = new SqlDataAdapter(getStudents);
-                    DataTable dt = new DataTable("Student");
-                    studentDataAdapter.Fill(dt);
-                    dg_Students.ItemsSource = dt.DefaultView;
-                    studentDataAdapter.Update(dt);
-                }
-            }
-            catch (Exception exception)
-            {
-                MessageBox.Show(exception.Message);
-            }
-        }
-
-        private void EmailButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            _window = new SearchStudentWindow(2);
-            _window.Show();
-        }
 
         private void LogOutButton_OnClick(object sender, RoutedEventArgs e)
         {

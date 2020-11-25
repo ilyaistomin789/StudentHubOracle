@@ -1,0 +1,8 @@
+realize adjustment, retakes in mainwindow + 
+deanery can see image in dg
+teacher see accept/decline, data accept/decline from deanery (decline, accept/decline, accept/accept)
+teacher can insert into student_progress notes
+do timetable
+do elder (insert gaps) +-
+do hash in procedure for password + 
+do crd for admin

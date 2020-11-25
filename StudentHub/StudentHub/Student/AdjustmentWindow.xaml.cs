@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using Oracle.ManagedDataAccess.Client;
 using StudentHub.DataBase;
 using StudentHub.University;
 
@@ -22,9 +25,9 @@ namespace StudentHub
     /// Логика взаимодействия для AdjustmentWindow.xaml
     /// </summary>
     public partial class AdjustmentWindow : Window
-    {
-        private UniversityEssence university = UniversityEssence.GetInstance();
+    { 
         private Student _student;
+        private byte[] imageCode;
         public AdjustmentWindow()
         {
             InitializeComponent();
@@ -35,41 +38,44 @@ namespace StudentHub
             InitializeComponent();
             _student = student;
             InitializeComboBox();
+            this.Show();
         }
+        private void GetInfoFromTables(string cmdText, string element, ComboBox cb, OracleConnection connection, OracleParameter op)
+        {
+            using (OracleCommand command = new OracleCommand(cmdText, connection))
+            {
+                command.CommandType = CommandType.Text;
+                command.Parameters.Add(op);
+                var reader = command.ExecuteReader();
+                DataTable dt = new DataTable();
+                dt.Load(reader);
+                foreach (DataRow row in dt.Rows)
+                {
+                    cb.Items.Add(row[element].ToString());
+                }
+            }
+        }
+
         private void InitializeComboBox()
         {
-            string getSubjectsProcedure = "GET_SUBJECTS";
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
-                    connection.Open();
-                    SqlCommand getSubjectCommand = new SqlCommand(getSubjectsProcedure, connection);
-                    getSubjectCommand.CommandType = CommandType.StoredProcedure;
-                    SqlParameter facultyParameter = new SqlParameter
+                    OracleParameter faculty = new OracleParameter
                     {
-                        ParameterName = "@Faculty",
+                        ParameterName = "in_faculty",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
                         Value = _student.Faculty
                     };
-                    getSubjectCommand.Parameters.Add(facultyParameter);
-                    var subjects = getSubjectCommand.ExecuteReader();
-                    if (subjects.HasRows)
-                    {
-                        while (subjects.Read())
-                        {
-                            a_subjectComboBox.Items.Add(subjects.GetString(0));
-                        }
-                        subjects.Close();
-                        this.Show();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data could not be retrieved. You may have entered your personal information incorrectly");
-                        this.Close();
-                        return;
-                    }
+                    connection.Open();
+                    GetInfoFromTables("select subject from subjects where faculty = :in_faculty", "subject", a_subjectComboBox,connection, faculty);
+                    GetInfoFromTables("select teacher_name from teacher_info where faculty = :in_faculty", "teacher_name", a_teacherComboBox, connection, faculty.Clone() as OracleParameter);
+                    connection.Close();
                 }
 
+                a_teacherComboBox.SelectedIndex = 0;
                 a_subjectComboBox.SelectedIndex = 0;
             }
             catch (Exception e)
@@ -78,90 +84,88 @@ namespace StudentHub
             }
         }
 
-        private bool CheckAdjustments(SqlConnection connection)
-        {
-            string checkAdjustmentsQuery =
-                "SELECT StudentId,SubjectName,ADate FROM Adjustment where StudentId = @StudentId and SubjectName = @SubjectName and ADate = @ADate";
-            SqlCommand checkAdjustmentsCommand = new SqlCommand(checkAdjustmentsQuery, connection);
-            checkAdjustmentsCommand.CommandType = CommandType.Text;
-            SqlParameter studentIdParameter = new SqlParameter
-            {
-                ParameterName = "@StudentId",
-                Value = _student.StudentId
-            };
-            SqlParameter subjectNameParameter = new SqlParameter
-            {
-                ParameterName = "@SubjectName",
-                Value = a_subjectComboBox.Text
-            };
-            SqlParameter aDateParameter = new SqlParameter
-            {
-                ParameterName = "@ADate",
-                Value = a_adjustmentDateCalendar.SelectedDate
-            };
-            checkAdjustmentsCommand.Parameters.Add(studentIdParameter);
-            checkAdjustmentsCommand.Parameters.Add(subjectNameParameter);
-            checkAdjustmentsCommand.Parameters.Add(aDateParameter);
-            var check = checkAdjustmentsCommand.ExecuteReader();
-            if (check.HasRows)
-            {
-                check.Close();
-                return true;
-            }
-            else
-            {
-                check.Close();
-                return false;
-            }
-        }
-
         private void A_sendRequestButton_OnClick(object sender, RoutedEventArgs e)
         {
-            string addAdjustmentProcedure = "ADD_ADJUSTMENT";
             if (a_subjectComboBox.Text == String.Empty)
             {
                 MessageBox.Show("Please, choose the Subject");
                 return;
             }
+            if (a_teacherComboBox.Text == String.Empty)
+            {
+                MessageBox.Show("Please, choose the Teacher");
+                return;
+            }
+            if (imageCode == null)
+            {
+                MessageBox.Show("Please, choose the image");
+                return;
+            }
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
-                    connection.Open();
-                    if (CheckAdjustments(connection))
+                    OracleParameter userId = new OracleParameter
                     {
-                        MessageBox.Show("This request is exists");
-                        return;
-                    }
-                    SqlCommand addAdjustmentCommand = new SqlCommand(addAdjustmentProcedure, connection);
-                    addAdjustmentCommand.CommandType = CommandType.StoredProcedure;
-                    SqlParameter studentIdParameter = new SqlParameter
-                    {
-                        ParameterName = "@StudentId",
-                        Value = _student.StudentId
+                        ParameterName = "in_user_id",
+                        OracleDbType = OracleDbType.Int64,
+                        Direction = ParameterDirection.Input,
+                        Value = _student.UserId
                     };
-                    SqlParameter subjectNameParameter = new SqlParameter
+                    OracleParameter teacherName = new OracleParameter
                     {
-                        ParameterName = "@SubjectName",
+                        ParameterName = "in_teacher_name",
+                        OracleDbType = OracleDbType.Varchar2,
+                        Direction = ParameterDirection.Input,
+                        Value = a_teacherComboBox.Text
+                    };
+                    OracleParameter subject = new OracleParameter
+                    {
+                        ParameterName = "in_subject",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
                         Value = a_subjectComboBox.Text
                     };
-                    SqlParameter aDateParameter = new SqlParameter
+                    OracleParameter filingDate = new OracleParameter
                     {
-                        ParameterName = "@ADate",
-                        Value = a_adjustmentDateCalendar.SelectedDate
+                        ParameterName = "in_filing_date",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Date,
+                        Value = a_filingDateCalendar.SelectedDate
                     };
-                    addAdjustmentCommand.Parameters.Add(studentIdParameter);
-                    addAdjustmentCommand.Parameters.Add(subjectNameParameter);
-                    addAdjustmentCommand.Parameters.Add(aDateParameter);
-                    addAdjustmentCommand.ExecuteNonQuery();
-                    MessageBox.Show("Done");
-
+                    OracleParameter img = new OracleParameter
+                    {
+                        ParameterName = "in_img",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Blob,
+                        Value = imageCode
+                    };
+                    connection.Open();
+                    using (OracleCommand command = new OracleCommand("addAdjustment", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddRange(new OracleParameter[] {userId,teacherName,subject,filingDate,img});
+                        command.ExecuteNonQuery();
+                    }
+                    connection.Close();
                 }
+                MessageBox.Show("Done");
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message);
             }
+        }
+
+        private void A_addFile_OnClick(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Image files (*.png;*.jpeg)|*.png;*.jpeg";
+            if (ofd.ShowDialog() != true) return;
+            FileStream fs = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read);
+            BinaryReader br = new BinaryReader(fs);
+            byte[] ic = br.ReadBytes((Int32)fs.Length);
+            imageCode = ic;
         }
     }
 }

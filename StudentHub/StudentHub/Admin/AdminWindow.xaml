@@ -23,7 +23,7 @@
 
             <StackPanel Grid.Column="0">
                 <Image Source="../Sources/Window/sm.png" Width="115"/>
-                <TextBlock Text="Student Hub Admin" FontSize="25" TextAlignment="Center"/>
+                <TextBlock Text="Student Hub Deanery" FontSize="25" TextAlignment="Center"/>
                 <StackPanel>
                 <Button HorizontalContentAlignment="Left" x:Name="adjustmentWorkButton" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="AdjustmentWorkButton_OnClick">
                     <TextBlock Text="{DynamicResource admin_AdjustmentWork}"/>
@@ -40,28 +40,10 @@
                         <TextBlock Text="{DynamicResource admin_RetakeWork}"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="searchQueryButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="SearchQueryButton_OnClick">
-                    <StackPanel>
-                        <Image/>
-                        <TextBlock Text="{DynamicResource admin_SearchQuery}"/>
-                    </StackPanel>
-                </Button>
                 <Button x:Name="studentProgressButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="StudentProgressButton_OnClick">
                     <StackPanel>
                         <Image/>
                         <TextBlock Text="{DynamicResource admin_StudentProgress}"/>
-                    </StackPanel>
-                </Button>
-                <Button x:Name="reportButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="ReportButton_OnClick">
-                    <StackPanel>
-                        <Image/>
-                        <TextBlock Text="{DynamicResource admin_ReportWork}"/>
-                    </StackPanel>
-                </Button>
-                <Button x:Name="emailButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="EmailButton_OnClick">
-                    <StackPanel>
-                        <Image/>
-                        <TextBlock Text="{DynamicResource admin_EmailGeneration}"/>
                     </StackPanel>
                 </Button>
                 <Button x:Name="logOutButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="LogOutButton_OnClick">
@@ -81,7 +63,7 @@
         <StackPanel Grid.Column="1">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <TextBlock Text="{DynamicResource m_Welcome}" FontSize="30"/>
-                <TextBlock x:Name="adminNameTextBlock" FontSize="30"/>
+                <TextBlock x:Name="deaneryTextBlock" FontSize="30"/>
             </StackPanel>
             <StackPanel x:Name="reportStackPanel" Visibility="Collapsed">
                 <StackPanel Orientation="Horizontal">

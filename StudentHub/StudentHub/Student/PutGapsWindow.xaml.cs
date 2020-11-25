@@ -13,6 +13,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Oracle.ManagedDataAccess.Client;
 using StudentHub.DataBase;
 using StudentHub.University;
 
@@ -31,84 +32,70 @@ namespace StudentHub
             _student = student;
             InitializeComboBox();
         }
+
+        private void GetInfoFromTables(string cmdText, string element, ComboBox cb, OracleConnection connection, OracleParameter[] op, string message)
+        {
+            using (OracleCommand command = new OracleCommand(cmdText, connection))
+            {
+                command.CommandType = CommandType.Text;
+                command.Parameters.AddRange(op);
+                var reader = command.ExecuteReader();
+                if (!reader.HasRows)
+                {
+                    throw new Exception(message);
+                }
+                DataTable dt = new DataTable();
+                dt.Load(reader);
+                foreach (DataRow row in dt.Rows)
+                {
+                    cb.Items.Add(row[element].ToString());
+                }
+            }
+        }
         private void InitializeComboBox()
         {
-            string getStudentsQuery =
-                "SELECT StudentName from Student where Course = @Course and GroupId = @GroupId and Specialization = @Specialization and Faculty = @Faculty";
-            string getSubjectsProcedure = "GET_SUBJECTS";
+            string message =
+                "Data could not be retrieved. You or students may have entered your personal information incorrectly";
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
-                    connection.Open();
-                    SqlCommand getStudentsCommand = new SqlCommand(getStudentsQuery, connection);
-                    SqlCommand getSubjectCommand = new SqlCommand(getSubjectsProcedure, connection);
-                    getSubjectCommand.CommandType = CommandType.StoredProcedure;
-                    getStudentsCommand.CommandType = CommandType.Text;
-                    SqlParameter courseParameter = new SqlParameter
+                    OracleParameter faculty = new OracleParameter
                     {
-                        ParameterName = "@Course",
-                        Value = _student.Course
+                        ParameterName = "in_faculty",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
+                        Value = _student.Faculty
                     };
-                    SqlParameter groupIdParameter = new SqlParameter
+                    OracleParameter specialization = new OracleParameter
                     {
-                        ParameterName = "@GroupId",
-                        Value = _student.Group
-                    };
-                    SqlParameter specializationParameter = new SqlParameter
-                    {
-                        ParameterName = "@Specialization",
+                        ParameterName = "in_specialization",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
                         Value = _student.Specialization
                     };
-                    SqlParameter facultyParameter = new SqlParameter
+                    OracleParameter numGroup = new OracleParameter
                     {
-                        ParameterName = "@Faculty",
-                        Value = _student.Faculty
+                        ParameterName = "in_num_group",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Int64,
+                        Value = _student.Group
                     };
-                    SqlParameter facultyParameterSub = new SqlParameter
+                    OracleParameter course = new OracleParameter
                     {
-                        ParameterName = "@Faculty",
-                        Value = _student.Faculty
+                        ParameterName = "in_course",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Int64,
+                        Value = _student.Course
                     };
-                    getStudentsCommand.Parameters.Add(courseParameter);
-                    getStudentsCommand.Parameters.Add(groupIdParameter);
-                    getStudentsCommand.Parameters.Add(specializationParameter);
-                    getStudentsCommand.Parameters.Add(facultyParameter);
-                    getSubjectCommand.Parameters.Add(facultyParameterSub);
-                    var students = getStudentsCommand.ExecuteReader();
-                    if (students.HasRows)
-                    {
-                        while (students.Read())
-                        {
-                            p_studentsComboBox.Items.Add(students.GetString(0));
-                        }
-                        students.Close();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data could not be retrieved. You or students may have entered your personal information incorrectly");
-                        this.Close();
-                    }
-                    var subjects = getSubjectCommand.ExecuteReader();
-                    if (subjects.HasRows)
-                    {
-                        while (subjects.Read())
-                        {
-                            p_subjectsComboBox.Items.Add(subjects.GetString(0));
-                        }
-                        subjects.Close();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data could not be retrieved. You or students may have entered your personal information incorrectly");
-                        this.Close();
-                    }
+                    GetInfoFromTables("select subject from subjects where faculty = :in_faculty","subject",p_subjectsComboBox,connection, new OracleParameter[] {faculty}, "Error when reading subjects");
+                    GetInfoFromTables("select student_name from student_info where specialization = :in_specialization and faculty = :in_faculty and num_group = :in_num_group " +
+                                      "and course = :in_course", "student_name",p_studentsComboBox,connection, new OracleParameter[] {faculty.Clone() as OracleParameter, specialization, numGroup,course}, message);
+                    connection.Open();
+                    connection.Close();
                 }
 
-                foreach (var t in _university.countOfGaps)
-                {
-                    p_gapsComboBox.Items.Add(t);
-                }
+                foreach (var t in _university.countOfGaps) p_gapsComboBox.Items.Add(t);
 
                 p_studentsComboBox.SelectedIndex = 0;
                 p_subjectsComboBox.SelectedIndex = 0;
@@ -118,9 +105,10 @@ namespace StudentHub
             catch (Exception e)
             {
                 MessageBox.Show(e.Message);
+                this.Close();
             }
         }
-
+        //TODO fix
         private void P_saveButton_OnClick(object sender, RoutedEventArgs e)
         {
             string setProgressProcedure = "SET_GAPS";

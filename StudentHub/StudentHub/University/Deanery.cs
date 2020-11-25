@@ -8,8 +8,10 @@ namespace StudentHub.University
 {
     public class Deanery
     {
-        public long DeaneryId { get; set; }
+        public int DeaneryId { get; set; }
         public string DeaneryName { get; set; }
-        public long UserId { get; set; }
+        public int UserId { get; set; }
+        public string Telephone { get; set; }
+        public string Faculty { get; set; }
     }
 }

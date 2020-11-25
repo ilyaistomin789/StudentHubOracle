@@ -20,7 +20,7 @@ END;
 CREATE TABLE users (
 id NUMBER(10) DEFAULT NULL NULL,
 login VARCHAR2(40) DEFAULT NULL NULL,
-password VARCHAR2(50) DEFAULT NULL NULL,
+password VARCHAR2(2000) DEFAULT NULL NULL,
 role VARCHAR2(20) DEFAULT NULL NULL,
 PRIMARY KEY (id)
 );
@@ -73,7 +73,7 @@ END;
 
 
 ---
--- Table 'admin_info'
+-- Table 'deanery_info'
 --
 ---
 
@@ -300,9 +300,11 @@ subject CHAR(20) DEFAULT NULL NULL,
 status varchar2(20) DEFAULT NULL NULL,
 adjustment_date DATE DEFAULT NULL NULL,
 access_date DATE DEFAULT NULL NULL,
+filing_date DATE default null null,
 img blob,
 PRIMARY KEY (id)
 );
+
 
 -- Generate ID using sequence and trigger
 CREATE SEQUENCE adjustments_seq START WITH 1 INCREMENT BY 1;
@@ -447,36 +449,47 @@ CREATE OR REPLACE PROCEDURE findUser (in_login in users.login%TYPE, in_password 
 IS
 invalid_user EXCEPTION;
 check_count number;
+encode_key varchar2(2000) := 'StudentHub123456';
+encode_mode number;
+encode_pass raw(2000);
 BEGIN
-SELECT COUNT(*) into check_count from users where login = in_login and password = in_password;
-    if check_count != 0 then user_cur := get_user_cursor(in_login, in_password);
+encode_mode := DBMS_CRYPTO.ENCRYPT_AES128 + DBMS_CRYPTO.CHAIN_CBC + DBMS_CRYPTO.PAD_PKCS5;
+encode_pass := DBMS_CRYPTO.ENCRYPT(utl_i18n.string_to_raw (in_password, 'AL32UTF8'), encode_mode,
+    utl_i18n.string_to_raw (encode_key, 'AL32UTF8'));
+
+SELECT COUNT(*) into check_count from users where login = in_login and password = UTL_RAW.CAST_TO_VARCHAR2(encode_pass);
+    if check_count != 0 then user_cur := get_user_cursor(in_login, UTL_RAW.CAST_TO_VARCHAR2(encode_pass));
     else raise invalid_user;
     end if;
     DBMS_OUTPUT.ENABLE();
     DBMS_SQL.RETURN_RESULT(user_cur);
     exception
     when invalid_user then
-    DBMS_OUTPUT.PUT_LINE('Please, check that the information you entered is correct');
+    RAISE_APPLICATION_ERROR(-20005, 'Please, check that the information you entered is correct');
 end findUser;
 
---add hash password
-CREATE PROCEDURE addUser(in_login in users.login%TYPE, in_password in users.password%TYPE)
+CREATE or replace PROCEDURE addUser(in_login in users.login%TYPE, in_password in users.password%TYPE)
 IS
 user_exists number;
 user_id users.id%TYPE;
 curr_user_exists exception;
+encode_key varchar2(2000) := 'StudentHub123456';
+encode_mode number;
+encode_pass raw(2000);
 begin
+    encode_mode := DBMS_CRYPTO.ENCRYPT_AES128 + DBMS_CRYPTO.CHAIN_CBC + DBMS_CRYPTO.PAD_PKCS5;
     SELECT COUNT(*) into user_exists from users where users.login = in_login;
+    encode_pass := DBMS_CRYPTO.ENCRYPT(utl_i18n.string_to_raw (in_password, 'AL32UTF8'), encode_mode, utl_i18n.string_to_raw (encode_key, 'AL32UTF8'));
+
     if user_exists != 0 then raise curr_user_exists;
-        else insert into users (login,password,role) values (in_login,in_password,'student');
+        else insert into users (login,password,role) values (in_login,UTL_RAW.CAST_TO_VARCHAR2(encode_pass),'student');
     end if;
     SELECT MAX(id) into user_id from users;
     ADDEMPTYSTUDENT(user_id);
     exception
     when curr_user_exists then
-    DBMS_OUTPUT.PUT_LINE('This user is exists');
+    raise_application_error(-20000, 'This user is exists');
 end addUser;
-drop procedure addUser;
 
 CREATE OR REPLACE PROCEDURE addEmptyStudent(in_id in users.id%TYPE)
 IS
@@ -508,10 +521,68 @@ begin
     commit;
     open new_user for select * from student_info where user_id = in_user_id;
 end updateStudent;
-    select * from student_info;
-select * from student_progress;
-select * from adjustments;
-select * from retakes;
+
+
+create or replace procedure addAdjustment(in_user_id users.id%type, in_teacher_name teacher_info.teacher_name%type, in_subject subjects.subject%type, in_filing_date
+adjustments.filing_date%type, in_img blob)
+IS
+    curr_teacher_id number;
+    check_adj number;
+    adjustment_exists exception;
+BEGIN
+    SELECT user_id into curr_teacher_id from teacher_info where teacher_name = in_teacher_name;
+        SELECT count(*) into check_adj from adjustments where user_id = in_user_id and teacher_id = curr_teacher_id and subject = in_subject and filing_date = in_filing_date;
+    if check_adj = 0 then
+    insert into adjustments(user_id, teacher_id, subject, status, filing_date, img) values(in_user_id, curr_teacher_id,
+                                                                                           in_subject, 'in processing',in_filing_date,in_img);
+    commit;
+    else raise adjustment_exists;
+    end if;
+    exception when adjustment_exists then RAISE_APPLICATION_ERROR(-20001, 'This Adjustment is exists');
+end;
+    select * from adjustments;
+
+create or replace procedure addRetake(in_user_id users.id%type, in_teacher_name teacher_info.teacher_name%type, in_subject subjects.subject%type, in_retake_date
+retakes.retake_date%type, in_img blob)
+IS
+    curr_teacher_id number;
+    check_ret number;
+    retake_exists exception;
+BEGIN
+    SELECT user_id into curr_teacher_id from teacher_info where teacher_name = in_teacher_name;
+        SELECT count(*) into check_ret from retakes where user_id = in_user_id and teacher_id = curr_teacher_id and subject = in_subject and retake_date = in_retake_date;
+    if check_ret = 0 then
+    insert into retakes(user_id, teacher_id, subject, status, retake_date, img) values(in_user_id, curr_teacher_id,
+                                                                                           in_subject, 'in processing',in_retake_date,in_img);
+    commit;
+    else raise retake_exists;
+    end if;
+    exception when retake_exists then RAISE_APPLICATION_ERROR(-20002, 'This Retake is exists');
+end;
+
+create or replace procedure findDeanery(in_user_id users.id%type, deanery out sys_refcursor)
+is
+    deanery_exists number;
+    deanery_exception exception;
+begin
+    select count(*) into deanery_exists from deanery_info where user_id = in_user_id;
+    if deanery_exists != 0 then open deanery for select * from deanery_info where user_id = in_user_id;
+    else raise deanery_exception;
+    end if;
+    exception when deanery_exception then RAISE_APPLICATION_ERROR(-66667, 'error when searching for information');
+end;
+
+create or replace procedure findTeacher(in_user_id users.id%type, teacher out sys_refcursor)
+is
+    teacher_exists number;
+    teacher_exception exception;
+begin
+    select count(*) into teacher_exists from teacher_info where user_id = in_user_id;
+    if teacher_exists != 0 then open teacher for select * from teacher_info where user_id = in_user_id;
+    else raise teacher_exception;
+    end if;
+    exception when teacher_exception then RAISE_APPLICATION_ERROR(-66667, 'error when searching for information');
+end;
 
 -- ----
 -- INSERTS

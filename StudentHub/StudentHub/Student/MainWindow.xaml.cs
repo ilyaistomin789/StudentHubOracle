@@ -30,7 +30,6 @@ namespace StudentHub
                 putGapsButton.Visibility = Visibility.Visible;
                 setRatingsButton.Visibility = Visibility.Visible;
             }
-            //TODO FIX WINDOWS 
             if (_student.Name == String.Empty)
             {
                 MessageBox.Show("Please, enter information about yourself");

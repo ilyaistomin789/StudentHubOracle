@@ -26,6 +26,7 @@
     <v:String x:Key="s_ShowInformation">Show Information</v:String>
     <v:String x:Key="e_EditInformation">Edit Information</v:String>
     <v:String x:Key="a_AdjustmentDate">Adjustment Date</v:String>
+    <v:String x:Key="a_FilingDate">Filing Date</v:String>
     <v:String x:Key="a_Adjustment">Adjustment</v:String>
     <v:String x:Key="r_Retake">Retake</v:String>
     <v:String x:Key="r_RetakeDate">Retake Date</v:String>
@@ -53,6 +54,7 @@
     <v:String x:Key="admin_EmailTextBlock">Email</v:String>
     <v:String x:Key="admin_EmailPasswordTextBlock">Password</v:String>
     <v:String x:Key="app_Subject">Subject</v:String>
+    <v:String x:Key="app_Teacher">Teacher</v:String>
     <v:String x:Key="app_StudentName">Student</v:String>
     <v:String x:Key="app_StudentStatus">Status</v:String>
     <v:String x:Key="app_Email">E-mail with pass</v:String>
@@ -66,5 +68,6 @@
     <v:String x:Key="app_SendRequest">Send Request</v:String>
     <v:String x:Key="app_Save">Save</v:String>
     <v:String x:Key="app_Generate">Generate</v:String>
+    <v:String x:Key="app_AddFile">Add file</v:String>
     <v:String x:Key="app_Creator">Created by Ilya Istomin 2020</v:String>
 </ResourceDictionary>

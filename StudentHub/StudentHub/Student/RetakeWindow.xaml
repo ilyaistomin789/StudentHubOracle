@@ -18,10 +18,16 @@
                 <TextBlock Text="{DynamicResource app_Subject}" Width="120"/>
                 <ComboBox x:Name="r_subjectComboBox" Width="200"/>
             </StackPanel>
-            <StackPanel HorizontalAlignment="Center" Margin="7">
-                <TextBlock Text="{DynamicResource m_RequestToRetake}" HorizontalAlignment="Center"/>
-                <Calendar x:Name="r_adjustmentDateCalendar" Language="en-US"/>
+            <StackPanel Orientation="Horizontal" Margin="5" HorizontalAlignment="Center">
+                <TextBlock Text="{DynamicResource app_Teacher}" Width="120"/>
+                <ComboBox x:Name="r_teacherComboBox" Width="200"/>
             </StackPanel>
+            <StackPanel HorizontalAlignment="Center" Margin="7">
+                <TextBlock Text="{DynamicResource r_RetakeDate}" HorizontalAlignment="Center"/>
+                <Calendar x:Name="r_retakeDateCalendar" Language="en-US"/>
+            </StackPanel>
+            <Button x:Name="r_addFile" Content="{DynamicResource app_AddFile}" Style="{StaticResource MainButtons}"  Background="Cornsilk" Foreground="Black" Margin="10" Height="40" Width="140" Click="R_addFile_OnClick"/>
+
             <Button x:Name="r_sendRequestButton" Content="{DynamicResource app_SendRequest}" Style="{StaticResource MainButtons}" Background="Cornsilk" Foreground="Black" Margin="10" Height="40" Width="140" Click="R_sendRequestButton_OnClick"/>
         </StackPanel>
     </Grid>

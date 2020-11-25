@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using Oracle.ManagedDataAccess.Client;
 using StudentHub.DataBase;
 using StudentHub.University;
 
@@ -23,6 +26,7 @@ namespace StudentHub
     /// </summary>
     public partial class RetakeWindow : Window
     {
+        private byte[] imageCode;
         private Student _student;
         public RetakeWindow()
         {
@@ -35,80 +39,46 @@ namespace StudentHub
             _student = student;
             InitializeComboBox();
         }
+        private void GetInfoFromTables(string cmdText, string element, ComboBox cb, OracleConnection connection, OracleParameter op)
+        {
+            using (OracleCommand command = new OracleCommand(cmdText, connection))
+            {
+                command.CommandType = CommandType.Text;
+                command.Parameters.Add(op);
+                var reader = command.ExecuteReader();
+                DataTable dt = new DataTable();
+                dt.Load(reader);
+                foreach (DataRow row in dt.Rows)
+                {
+                    cb.Items.Add(row[element].ToString());
+                }
+            }
+        }
 
         private void InitializeComboBox()
         {
-            string getSubjectsProcedure = "GET_SUBJECTS";
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
-                    connection.Open();
-                    SqlCommand getSubjectCommand = new SqlCommand(getSubjectsProcedure,connection);
-                    getSubjectCommand.CommandType = CommandType.StoredProcedure;
-                    SqlParameter facultyParameter = new SqlParameter
+                    OracleParameter faculty = new OracleParameter
                     {
-                        ParameterName = "@Faculty",
+                        ParameterName = "in_faculty",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType =  OracleDbType.Varchar2,
                         Value = _student.Faculty
                     };
-                    getSubjectCommand.Parameters.Add(facultyParameter);
-                    var subjects = getSubjectCommand.ExecuteReader();
-                    if (subjects.HasRows)
-                    {
-                        while (subjects.Read())
-                        {
-                            r_subjectComboBox.Items.Add(subjects.GetString(0));
-                        }
-                        subjects.Close();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Data could not be retrieved. You or students may have entered your personal information incorrectly");
-                        this.Close();
-                    }
+                    connection.Open();
+                    GetInfoFromTables("select subject from subjects where faculty = :in_faculty", "subject", r_subjectComboBox, connection, faculty);
+                    GetInfoFromTables("select teacher_name from teacher_info where faculty = :in_faculty", "teacher_name", r_teacherComboBox, connection, faculty.Clone() as OracleParameter);
+                    connection.Close();
                 }
-
+                r_teacherComboBox.SelectedIndex = 0;
                 r_subjectComboBox.SelectedIndex = 0;
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.Message);
-            }
-        }
-        private bool CheckRetakes(SqlConnection connection)
-        {
-            string checkRetakesQuery =
-                "SELECT StudentId,SubjectName,RDate FROM Retake where StudentId = @StudentId and SubjectName = @SubjectName and RDate = @RDate";
-            SqlCommand checkRetakesCommand = new SqlCommand(checkRetakesQuery, connection);
-            checkRetakesCommand.CommandType = CommandType.Text;
-            SqlParameter studentIdParameter = new SqlParameter
-            {
-                ParameterName = "@StudentId",
-                Value = _student.StudentId
-            };
-            SqlParameter subjectNameParameter = new SqlParameter
-            {
-                ParameterName = "@SubjectName",
-                Value = r_subjectComboBox.Text
-            };
-            SqlParameter rDateParameter = new SqlParameter
-            {
-                ParameterName = "@RDate",
-                Value = r_adjustmentDateCalendar.SelectedDate
-            };
-            checkRetakesCommand.Parameters.Add(studentIdParameter);
-            checkRetakesCommand.Parameters.Add(subjectNameParameter);
-            checkRetakesCommand.Parameters.Add(rDateParameter);
-            var check = checkRetakesCommand.ExecuteReader();
-            if (check.HasRows)
-            {
-                check.Close();
-                return true;
-            }
-            else
-            {
-                check.Close();
-                return false;
             }
         }
 
@@ -119,45 +89,82 @@ namespace StudentHub
                 MessageBox.Show("Please, choose the Subject");
                 return;
             }
-            string addRetakeProcedure = "ADD_RETAKE";
+            if (r_teacherComboBox.Text == String.Empty)
+            {
+                MessageBox.Show("Please, choose the Teacher");
+                return;
+            }
+            if (imageCode == null)
+            {
+                MessageBox.Show("Please, choose the image");
+                return;
+            }
+            OracleParameter userId = new OracleParameter
+            {
+                ParameterName = "in_user_id",
+                OracleDbType = OracleDbType.Int64,
+                Direction = ParameterDirection.Input,
+                Value = _student.UserId
+            };
+            OracleParameter teacherName = new OracleParameter
+            {
+                ParameterName = "in_teacher_name",
+                OracleDbType = OracleDbType.Varchar2,
+                Direction = ParameterDirection.Input,
+                Value = r_teacherComboBox.Text
+            };
+            OracleParameter subject = new OracleParameter
+            {
+                ParameterName = "in_subject",
+                Direction = ParameterDirection.Input,
+                OracleDbType = OracleDbType.Varchar2,
+                Value = r_subjectComboBox.Text
+            };
+            OracleParameter retakeDate = new OracleParameter
+            {
+                ParameterName = "in_retake_date",
+                Direction = ParameterDirection.Input,
+                OracleDbType = OracleDbType.Date,
+                Value = r_retakeDateCalendar.SelectedDate
+            };
+            OracleParameter img = new OracleParameter
+            {
+                ParameterName = "in_img",
+                Direction = ParameterDirection.Input,
+                OracleDbType = OracleDbType.Blob,
+                Value = imageCode
+            };
+
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
                     connection.Open();
-                    if (CheckRetakes(connection))
+                    using (OracleCommand command = new OracleCommand("addRetake", connection))
                     {
-                        MessageBox.Show("This request is exists");
-                        return;
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddRange(new OracleParameter[] { userId, teacherName, subject, retakeDate, img });
+                        command.ExecuteNonQuery();
                     }
-                    SqlCommand addRetakeCommand = new SqlCommand(addRetakeProcedure, connection);
-                    addRetakeCommand.CommandType = CommandType.StoredProcedure;
-                    SqlParameter studentIdParameter = new SqlParameter
-                    {
-                        ParameterName = "@StudentId",
-                        Value = _student.StudentId
-                    };
-                    SqlParameter subjectNameParameter = new SqlParameter
-                    {
-                        ParameterName = "@SubjectName",
-                        Value = r_subjectComboBox.Text
-                    };
-                    SqlParameter rDateParameter = new SqlParameter
-                    {
-                        ParameterName = "@RDate",
-                        Value = r_adjustmentDateCalendar.SelectedDate
-                    };
-                    addRetakeCommand.Parameters.Add(studentIdParameter);
-                    addRetakeCommand.Parameters.Add(subjectNameParameter);
-                    addRetakeCommand.Parameters.Add(rDateParameter);
-                    var done = addRetakeCommand.ExecuteNonQuery();
-                    MessageBox.Show("Done");
+                    connection.Close();
                 }
+                MessageBox.Show("Done");
             }
             catch (Exception exception)
             {
                 MessageBox.Show(exception.Message);
             }
+        }
+
+        private void R_addFile_OnClick(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Image files (*.png;*.jpeg)|*.png;*.jpeg";
+            if (ofd.ShowDialog() != true) return;
+            FileStream fs = new FileStream(ofd.FileName, FileMode.Open, FileAccess.Read);
+            BinaryReader br = new BinaryReader(fs);
+            byte[] ic = br.ReadBytes((Int32)fs.Length);
+            imageCode = ic;
         }
     }
 }

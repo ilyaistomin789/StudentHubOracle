@@ -8,6 +8,11 @@ namespace StudentHub.University
 {
     public class Teacher
     {
+        public int TeacherId { get; set; }
+        public int UserId { get; set; }
+        public string TeacherName { get; set; }
+        public string Faculty { get; set; }
+        public string Telephone { get; set; }
 
     }
 }
