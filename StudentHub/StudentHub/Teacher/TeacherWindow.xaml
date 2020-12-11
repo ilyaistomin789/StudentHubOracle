@@ -24,16 +24,13 @@
             <Image Source="../Sources/Window/sm.png" Width="115"/>
             <TextBlock Text="Student Hub Teacher" FontSize="25" TextAlignment="Center"/>
             <StackPanel>
-                <Button HorizontalContentAlignment="Left" x:Name="adjustmentWorkButton" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" >
+                <Button HorizontalContentAlignment="Left" x:Name="adjustmentWorkButton" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="AdjustmentWorkButton_OnClick">
                     <TextBlock Text="{DynamicResource admin_AdjustmentWork}"/>
                 </Button>
-                <Button x:Name="gapsWorkButton" Style="{StaticResource LauncherButtons}" HorizontalContentAlignment="Left" Height="50" Margin="3,10,3,0" >
-                    <StackPanel>
-                        <Image/>
-                        <TextBlock Text="{DynamicResource admin_GapsWork}"/>
-                    </StackPanel>
+                <Button HorizontalContentAlignment="Left" x:Name="setRatingsButton" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="setRatingsButton_Click" >
+                    <TextBlock Text="{DynamicResource a_SetRatings}"/>
                 </Button>
-                <Button x:Name="retakeWorkButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" >
+                <Button x:Name="retakeWorkButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="RetakeWorkButton_OnClick">
                     <StackPanel>
                         <Image/>
                         <TextBlock Text="{DynamicResource admin_RetakeWork}"/>

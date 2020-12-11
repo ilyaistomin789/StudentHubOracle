@@ -55,11 +55,10 @@ status varchar2(20) DEFAULT NULL NULL,
 course NUMBER(10) DEFAULT NULL NULL,
 num_group NUMBER(2) DEFAULT NULL NULL,
 specialization VARCHAR2(20) DEFAULT NULL NULL,
-faculty VARCHAR2(20) DEFAULT NULL NULL,
+faculty CHAR(10) DEFAULT NULL NULL,
 birthday DATE DEFAULT NULL NULL,
 PRIMARY KEY (id)
 );
-
 -- Generate ID using sequence and trigger
 CREATE SEQUENCE student_info_seq START WITH 1 INCREMENT BY 1;
 
@@ -336,11 +335,9 @@ teacher_id NUMBER(10) DEFAULT NULL NULL,
 subject CHAR(20) DEFAULT NULL NULL,
 status varchar2(20) DEFAULT NULL NULL,
 retake_date DATE DEFAULT NULL NULL,
-access_date DATE DEFAULT NULL NULL,
 img blob,
 PRIMARY KEY (id)
 );
-
 -- Generate ID using sequence and trigger
 CREATE SEQUENCE retakes_seq START WITH 1 INCREMENT BY 1;
 
@@ -368,6 +365,7 @@ CREATE TABLE gaps (
   user_id NUMBER(10) DEFAULT NULL NULL,
   subject CHAR(20) DEFAULT NULL NULL,
   gap_date DATE DEFAULT NULL NULL,
+  gaps_count number,
   PRIMARY KEY (id)
 );
 
@@ -457,8 +455,8 @@ encode_mode := DBMS_CRYPTO.ENCRYPT_AES128 + DBMS_CRYPTO.CHAIN_CBC + DBMS_CRYPTO.
 encode_pass := DBMS_CRYPTO.ENCRYPT(utl_i18n.string_to_raw (in_password, 'AL32UTF8'), encode_mode,
     utl_i18n.string_to_raw (encode_key, 'AL32UTF8'));
 
-SELECT COUNT(*) into check_count from users where login = in_login and password = UTL_RAW.CAST_TO_VARCHAR2(encode_pass);
-    if check_count != 0 then user_cur := get_user_cursor(in_login, UTL_RAW.CAST_TO_VARCHAR2(encode_pass));
+SELECT COUNT(*) into check_count from users where login = in_login and password = encode_pass;
+    if check_count != 0 then user_cur := get_user_cursor(in_login, encode_pass);
     else raise invalid_user;
     end if;
     DBMS_OUTPUT.ENABLE();
@@ -467,7 +465,9 @@ SELECT COUNT(*) into check_count from users where login = in_login and password 
     when invalid_user then
     RAISE_APPLICATION_ERROR(-20005, 'Please, check that the information you entered is correct');
 end findUser;
-
+select *
+from users;
+commit;
 CREATE or replace PROCEDURE addUser(in_login in users.login%TYPE, in_password in users.password%TYPE)
 IS
 user_exists number;
@@ -482,7 +482,7 @@ begin
     encode_pass := DBMS_CRYPTO.ENCRYPT(utl_i18n.string_to_raw (in_password, 'AL32UTF8'), encode_mode, utl_i18n.string_to_raw (encode_key, 'AL32UTF8'));
 
     if user_exists != 0 then raise curr_user_exists;
-        else insert into users (login,password,role) values (in_login,UTL_RAW.CAST_TO_VARCHAR2(encode_pass),'student');
+        else insert into users (login,password,role) values (in_login,encode_pass,'student');
     end if;
     SELECT MAX(id) into user_id from users;
     ADDEMPTYSTUDENT(user_id);
@@ -490,7 +490,7 @@ begin
     when curr_user_exists then
     raise_application_error(-20000, 'This user is exists');
 end addUser;
-
+    select * from users;
 CREATE OR REPLACE PROCEDURE addEmptyStudent(in_id in users.id%TYPE)
 IS
 begin
@@ -499,7 +499,7 @@ begin
     commit;
 end;
 
-CREATE PROCEDURE findStudent(in_user_id in users.id%type, student out sys_refcursor)
+CREATE or replace PROCEDURE findStudent(in_user_id in users.id%type, student out sys_refcursor)
 IS
 student_exists number;
 curr_student_not_exists exception;
@@ -508,7 +508,8 @@ select count(*) into student_exists from student_info where user_id = in_user_id
 if  student_exists != 0 then open student for select * from student_info where user_id = in_user_id;
 else raise curr_student_not_exists;
 end if;
-exception when curr_student_not_exists then DBMS_OUTPUT.PUT_LINE('error when searching for information');
+exception when curr_student_not_exists then
+    RAISE_APPLICATION_ERROR(-20007, 'Error when searching for information');
 end findStudent;
 
 CREATE OR REPLACE PROCEDURE updateStudent(in_user_id users.id%type, in_student_name student_info.student_name%type,
@@ -569,7 +570,7 @@ begin
     if deanery_exists != 0 then open deanery for select * from deanery_info where user_id = in_user_id;
     else raise deanery_exception;
     end if;
-    exception when deanery_exception then RAISE_APPLICATION_ERROR(-66667, 'error when searching for information');
+    exception when deanery_exception then RAISE_APPLICATION_ERROR(-20008, 'error when searching for information');
 end;
 
 create or replace procedure findTeacher(in_user_id users.id%type, teacher out sys_refcursor)
@@ -581,9 +582,105 @@ begin
     if teacher_exists != 0 then open teacher for select * from teacher_info where user_id = in_user_id;
     else raise teacher_exception;
     end if;
-    exception when teacher_exception then RAISE_APPLICATION_ERROR(-66667, 'error when searching for information');
+    exception when teacher_exception then RAISE_APPLICATION_ERROR(-20008, 'error when searching for information');
 end;
 
+create or replace procedure setGaps(in_student_name student_info.student_name%type,in_subject subjects.subject%type, in_gaps_count gaps.gaps_count%type,
+in_gap_date gaps.gap_date%type)
+is
+    student_id number;
+begin
+    select user_id into student_id from student_info where student_name = in_student_name;
+    insert into gaps (user_id, subject, gap_date, GAPS_COUNT) values (student_id, in_subject, in_gap_date, in_gaps_count);
+end setGaps;
+
+    select * from adjustments;
+select s.student_name || ' ' || s.course || '-' || s.num_group student, g.subject, sum(g.gaps_count) count from gaps g
+                                                                     inner join student_info s on g.user_id = s.user_id where s.faculty = :in_faculty
+                                                                     group by s.student_name, s.course, s.num_group, g.subject;
+
+create or replace procedure accept_decline_Adjustment(in_student_name student_info.student_name%type, in_subject subjects.subject%type,
+in_filing_date adjustments.filing_date%type, action boolean)
+is
+    curr_user_id users.id%type;
+begin
+    select user_id into curr_user_id from student_info where student_name = in_student_name;
+    if action = true then
+        update adjustments set status = 'accept/decline' where user_id = curr_user_id and subject = in_subject
+        and filing_date = in_filing_date;
+    else
+        update adjustments set status = 'decline' where user_id = curr_user_id and subject = in_subject
+        and filing_date = in_filing_date;
+    end if;
+end;
+
+create or replace procedure accept_decline_Retake(in_student_name student_info.student_name%type, in_subject subjects.subject%type,
+in_retake_date retakes.retake_date%type, action boolean)
+is
+    curr_user_id users.id%type;
+begin
+    select user_id into curr_user_id from student_info where student_name = in_student_name;
+    if action = true then
+        update retakes set status = 'accept' where user_id = curr_user_id and subject = in_subject
+        and retake_date = in_retake_date;
+    else
+        update retakes set status = 'decline' where user_id = curr_user_id and subject = in_subject
+        and retake_date = in_retake_date;
+    end if;
+end;
+    select * from retakes;
+
+create or replace procedure setRatings(in_student_name student_info.student_name%type,in_subject subjects.subject%type, in_note student_progress.note%type,
+in_progress_date student_progress.progress_date%type, in_comment student_progress.feedback%type)
+is
+    curr_user_id users.id%type;
+begin
+    select user_id into curr_user_id from student_info where student_name = in_student_name;
+    insert into student_progress(user_id, subject, note, progress_date,FEEDBACK) values (curr_user_id, in_subject, in_note, in_progress_date, in_comment);
+end setRatings;
+
+
+create or replace procedure accept_decline_Adjustment_Teacher(in_student_name student_info.student_name%type, in_subject subjects.subject%type, in_teacher_id
+users.id%type, in_adjustment_date adjustments.adjustment_date%type, in_filing_date adjustments.filing_date%type, action boolean)
+is
+    curr_student_id number;
+begin
+    select user_id into curr_student_id from student_info where student_name = in_student_name;
+    if action = true then
+    update adjustments set status = 'accept/accept', access_date = TO_CHAR(SYSDATE, 'DD.MM.YYYY'), adjustment_date = in_adjustment_date
+    where subject = in_subject and teacher_id = in_teacher_id and
+    user_id = curr_student_id and filing_date = in_filing_date;
+    else
+    update adjustments set status = 'accept/decline', access_date = null
+    where subject = in_subject and teacher_id = in_teacher_id and
+    user_id = curr_student_id and filing_date = in_filing_date;
+    end if;
+    commit;
+end accept_decline_Adjustment_Teacher;
+    select * from student_info;
+select a.img from adjustments a inner join student_info s on a.user_id = s.user_id where
+s.student_name = :in_student_name and s.faculty = :in_faculty and a.subject = :in_subject;
+-- ----
+-- GENERATE
+-- ----
+declare
+    i number(8):=0;
+ procedure generateUsers
+is
+begin
+    while i< 100000
+    loop
+        addUser('user'||i,'user'||i);
+        i:= i+1;
+    end loop;
+    commit;
+    exception when others then rollback;
+end generateUsers;
+begin
+generateUsers;
+end;
+select * from student_info;
+-- do xml
 -- ----
 -- INSERTS
 -- ----
@@ -596,9 +693,7 @@ insert all
 	into  Faculty(Faculty, name) values('ИТ', 'Факультет информационных технологий')
 	into  Faculty(Faculty, name) values('ИДиП', 'Издательское дело и полиграфия')
 	SELECT * from dual;
-select * from subjects;
-commit;
-select specialization from specialization;
+
 insert all
     into subjects (subject, name, faculty) values ('СУБД', 'Системы управления базами данных', 'ИТ')
 	into subjects (subject, name, faculty) values ('ООТПиСП', 'Объектно-ориентированные технологии программирования и структуры проектирвоания', 'ИТ')

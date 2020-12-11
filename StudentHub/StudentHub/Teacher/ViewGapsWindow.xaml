@@ -1,0 +1,24 @@
+﻿<Window x:Class="StudentHub.Teacher.ViewGapsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:StudentHub.Teacher"
+        mc:Ignorable="d"
+        WindowStartupLocation="CenterScreen"
+        Title="Gaps View" Height="600" Width="1300">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="450"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <ScrollViewer>
+            <StackPanel>
+                <TextBlock FontSize="30" TextAlignment="Center" Text="View retakes"/>
+                <DataGrid x:Name="dg_Gaps" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="18" 
+                          BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False"
+                          CanUserResizeRows="False" Width="1250" RowBackground="Transparent" Background="Transparent" VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="150" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" IsReadOnly="True"/>
+            </StackPanel>
+        </ScrollViewer>
+        </Grid>
+</Window>

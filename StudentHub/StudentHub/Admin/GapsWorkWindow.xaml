@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:StudentHub.Admin"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="Retake Work" Height="600" Width="1300">
+        Title="Retake Work" Height="600" Width="800">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="450"/>
@@ -16,12 +16,12 @@
             <TextBlock FontSize="30" TextAlignment="Center" Text="{DynamicResource admin_GapsWork}"/>
             <DataGrid x:Name="dg_Gaps" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="18" 
                       BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False"
-                      CanUserResizeRows="False" Width="1250" RowBackground="Transparent" Background="Transparent" 
+                      CanUserResizeRows="False" Width="600" RowBackground="Transparent" Background="Transparent" 
                       VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="150" 
                       ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" HorizontalAlignment="Center" IsReadOnly="True"/>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="LotOfStudentGapsButton" Content="{DynamicResource admin_LotOfPasses}" Style="{StaticResource MainButtons}" Background="#FFEAD133" Width="220" Height="45" Margin="5" Click="LotOfStudentGapsButton_OnClick"/>
+            <Button x:Name="CloseStudentGapsButton" Content="Close" Style="{StaticResource MainButtons}" Background="#FFEAD133" Width="220" Height="45" Margin="5" Click="CloseStudentGapsButton_OnClick"/>
         </StackPanel>
     </Grid>
 </Window>

@@ -6,22 +6,43 @@
         xmlns:local="clr-namespace:StudentHub.Admin"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="Adjustment Work" Height="600" Width="1300">
+        Title="Adjustment Work" Height="600" Width="1180">
+    <Window.Resources>
+        <DataGridTemplateColumn x:Key="dgt" Header="image" Width="290">
+            <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                    <Image Source="{Binding image}" />
+                </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+        <DataGridTemplateColumn x:Key="dgs" Header="student_name" Width="200">
+            <DataGridTemplateColumn.CellTemplate>
+                <DataTemplate>
+                    <Image Source="{Binding student_name}" />
+                </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="450"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
+        <ScrollViewer>
         <StackPanel>
             <TextBlock FontSize="30" TextAlignment="Center" Text="{DynamicResource admin_AdjustmentWork}"/>
             <DataGrid x:Name="dg_Adjustments" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="18" 
                       BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False"
-                      CanUserResizeRows="False" Width="1250" RowBackground="Transparent" Background="Transparent" VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="150" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" IsReadOnly="True">
+                      CanUserResizeRows="False" Width="1100" RowBackground="Transparent" Background="Transparent" VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="170" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" IsReadOnly="True">
             </DataGrid>
         </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
-            <Button x:Name="acceptButton" Content="{DynamicResource admin_Accept}" Style="{StaticResource MainButtons}" Background="#FF33EA33" Width="100" Height="40" Margin="5" Click="AcceptButton_OnClick"/>
-            <Button  x:Name="declineButton"  Content="{DynamicResource admin_Decline}" Style="{StaticResource MainButtons}" Background="#FFF04747" Width="100" Height="40" Margin="5" Click="DeclineButton_OnClick"/>
+        </ScrollViewer>
+        <StackPanel Grid.Row="1">
+            <Button x:Name="imageButton" Content="{DynamicResource admin_GetImage}" Style="{StaticResource MainButtons}" Background="#FF33EA54" Width="170" Height="40" Margin="5" Click="ImageButton_OnClick"/>
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button x:Name="acceptButton" Content="{DynamicResource admin_Accept}" Style="{StaticResource MainButtons}" Background="#FF33EA33" Width="100" Height="40" Margin="5" Click="AcceptButton_OnClick"/>
+                <Button  x:Name="declineButton"  Content="{DynamicResource admin_Decline}" Style="{StaticResource MainButtons}" Background="#FFF04747" Width="100" Height="40" Margin="5" Click="DeclineButton_OnClick"/>
+            </StackPanel>
         </StackPanel>
     </Grid>
 </Window>

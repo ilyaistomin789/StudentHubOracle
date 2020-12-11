@@ -90,6 +90,9 @@
     <Compile Include="Admin\SearchStudentWindow.xaml.cs">
       <DependentUpon>SearchStudentWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Admin\StudentProgress.xaml.cs">
+      <DependentUpon>StudentProgress.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Admin\ViewProgressWindow.xaml.cs">
       <DependentUpon>ViewProgressWindow.xaml</DependentUpon>
     </Compile>
@@ -126,8 +129,20 @@
     <Compile Include="Student\ShowInformationWindow.xaml.cs">
       <DependentUpon>ShowInformationWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Teacher\AdjustmentActionWindow.xaml.cs">
+      <DependentUpon>AdjustmentActionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Teacher\SetRatingsWindow.xaml.cs">
+      <DependentUpon>SetRatingsWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Teacher\TeacherWindow.xaml.cs">
       <DependentUpon>TeacherWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Teacher\ViewGapsWindow.xaml.cs">
+      <DependentUpon>ViewGapsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Teacher\ViewRetakeWindow.xaml.cs">
+      <DependentUpon>ViewRetakeWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="University\Deanery.cs" />
     <Compile Include="University\Progress.cs" />
@@ -157,6 +172,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Admin\SearchStudentWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Admin\StudentProgress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -243,7 +262,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Teacher\AdjustmentActionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Teacher\SetRatingsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Teacher\TeacherWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Teacher\ViewGapsWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Teacher\ViewRetakeWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

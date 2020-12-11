@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,24 +14,22 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Oracle.ManagedDataAccess.Client;
 using StudentHub.DataBase;
-using StudentHub.University;
 
-namespace StudentHub.Admin
+namespace StudentHub.Teacher
 {
     /// <summary>
-    /// Логика взаимодействия для GapsWorkWindow.xaml
+    /// Логика взаимодействия для ViewRetakeWindow.xaml
     /// </summary>
-    public partial class GapsWorkWindow : Window
+    public partial class ViewRetakeWindow : Window
     {
-        private Window _window;
-        private Deanery _deanery;
-        public GapsWorkWindow(Deanery deanery)
+        private University.Teacher _teacher;
+        public ViewRetakeWindow(University.Teacher teacher)
         {
-            _deanery = deanery;
+            _teacher = teacher;
             InitializeComponent();
-            GetGaps();
+            GetRetakes();
         }
-        private void GetGaps()
+        private void GetRetakes()
         {
             try
             {
@@ -43,19 +40,18 @@ namespace StudentHub.Admin
                         ParameterName = "in_faculty",
                         Direction = ParameterDirection.Input,
                         OracleDbType = OracleDbType.Varchar2,
-                        Value = _deanery.Faculty
+                        Value = _teacher.Faculty
                     };
                     connection.Open();
-                    using (OracleCommand command = new OracleCommand("select s.student_name || ' ' || s.course || '-' || s.num_group student, g.subject, sum(g.gaps_count) count from gaps g " +
-                                                                     "inner join student_info s on g.user_id = s.user_id where s.faculty = :in_faculty " +
-                                                                     "group by s.student_name, s.course, s.num_group, g.subject", connection))
+                    using (OracleCommand command = new OracleCommand("select s.student_name || ' ' || s.course || '-' || s.num_group student,s.faculty,r.subject,r.status,r.retake_date " +
+                                                                     "from retakes r inner join student_info s on r.user_id = s.user_id and s.faculty = :in_faculty", connection))
                     {
                         command.Parameters.Add(faculty);
                         command.ExecuteNonQuery();
                         OracleDataAdapter oda = new OracleDataAdapter(command);
-                        DataTable dt = new DataTable("gaps");
+                        DataTable dt = new DataTable("retakes");
                         oda.Fill(dt);
-                        dg_Gaps.ItemsSource = dt.DefaultView;
+                        dg_Retakes.ItemsSource = dt.DefaultView;
                         oda.Update(dt);
                     }
                     connection.Close();
@@ -67,7 +63,6 @@ namespace StudentHub.Admin
             }
         }
 
-
-        private void CloseStudentGapsButton_OnClick(object sender, RoutedEventArgs e) => this.Close();
     }
 }
+

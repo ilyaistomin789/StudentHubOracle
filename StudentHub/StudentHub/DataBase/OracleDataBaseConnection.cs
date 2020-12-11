@@ -12,7 +12,7 @@ namespace StudentHub.DataBase
 {
     public static class OracleDataBaseConnection
     {
-        private static string host = "192.168.1.38";
+        private static string host = "192.168.31.140";
         private static int port = 1521;
         private static string sid = "orcl.be.by";
         private static string password = "71182528";

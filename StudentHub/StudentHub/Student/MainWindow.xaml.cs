@@ -25,7 +25,7 @@ namespace StudentHub
             InitializeComponent();
             _user = user;
             FindStudent(_user.UserId);
-            if (_student.StudentStatus == "Elder")
+            if (_student.StudentStatus == "elder")
             {
                 putGapsButton.Visibility = Visibility.Visible;
                 setRatingsButton.Visibility = Visibility.Visible;
@@ -214,7 +214,7 @@ namespace StudentHub
                     LoadRetakesAndAdjustmentFromTables("select subject, status, adjustment_date, access_date from adjustments where user_id = :in_user_id",
                         connection,userId,m_AdjustmentTextBlock,m_AdjustmentSeparator,dg_Adjustments);
                     
-                    LoadRetakesAndAdjustmentFromTables("select subject, status, retake_date, access_date from retakes where user_id = :in_user_id",
+                    LoadRetakesAndAdjustmentFromTables("select subject, status, retake_date from retakes where user_id = :in_user_id",
                         connection, userId.Clone() as OracleParameter, m_RetakeTextBlock, m_RetakeSeparator, dg_Retakes);
                     connection.Close();
                 }

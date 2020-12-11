@@ -26,6 +26,7 @@ namespace StudentHub
     /// </summary>
     public partial class AdminWindow : Window
     {
+        private bool _studentVisibility;
         private Window _window;
         private User _user = new User();
         private Deanery _deanery = new Deanery();
@@ -81,27 +82,36 @@ namespace StudentHub
         private void AdminWindow_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e) => this.DragMove();
         private void AdjustmentWorkButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _window = new AdjustmentWorkWindow();
+            _window = new AdjustmentWorkWindow(_deanery);
             _window.Show();
         }
 
         private void GapsWorkButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _window = new GapsWorkWindow();
+            _window = new GapsWorkWindow(_deanery);
             _window.Show();
         }
 
         private void RetakeWorkButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _window = new RetakeWorkWindow();
+            _window = new RetakeWorkWindow(_deanery);
             _window.Show();
         }
 
 
         private void StudentProgressButton_OnClick(object sender, RoutedEventArgs e)
         {
-            _window = new SearchStudentWindow(1);
-            _window.Show();
+            if (!_studentVisibility)
+            {
+                studentProgressFrame.Navigate(new StudentProgress(_deanery));
+                studentProgressFrame.Visibility = Visibility.Visible;
+                _studentVisibility = true;
+            }
+            else
+            {
+                studentProgressFrame.Visibility = Visibility.Collapsed;
+                _studentVisibility = false;
+            }
         }
 
 

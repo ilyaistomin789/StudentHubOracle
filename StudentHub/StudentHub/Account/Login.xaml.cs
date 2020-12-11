@@ -74,7 +74,7 @@ namespace StudentHub.Account
                         ParameterName = "in_password",
                         Direction = ParameterDirection.Input,
                         OracleDbType = OracleDbType.Varchar2,
-                        Value = User.GetHashPassword(logIn_Password.Password)
+                        Value = logIn_Password.Password
                     };
                     OracleParameter user = new OracleParameter
                     {

@@ -42,7 +42,7 @@ namespace StudentHub
                 var reader = command.ExecuteReader();
                 if (!reader.HasRows)
                 {
-                    throw new Exception(message);
+                    MessageBox.Show(message);
                 }
                 DataTable dt = new DataTable();
                 dt.Load(reader);
@@ -58,42 +58,41 @@ namespace StudentHub
                 "Data could not be retrieved. You or students may have entered your personal information incorrectly";
             try
             {
+                OracleParameter faculty = new OracleParameter
+                {
+                    ParameterName = "in_faculty",
+                    Direction = ParameterDirection.Input,
+                    OracleDbType = OracleDbType.Varchar2,
+                    Value = _student.Faculty
+                };
+                OracleParameter specialization = new OracleParameter
+                {
+                    ParameterName = "in_specialization",
+                    Direction = ParameterDirection.Input,
+                    OracleDbType = OracleDbType.Varchar2,
+                    Value = _student.Specialization
+                };
+                OracleParameter numGroup = new OracleParameter
+                {
+                    ParameterName = "in_num_group",
+                    Direction = ParameterDirection.Input,
+                    OracleDbType = OracleDbType.Int64,
+                    Value = _student.Group
+                };
+                OracleParameter course = new OracleParameter
+                {
+                    ParameterName = "in_course",
+                    Direction = ParameterDirection.Input,
+                    OracleDbType = OracleDbType.Int64,
+                    Value = _student.Course
+                };
                 using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
-                    OracleParameter faculty = new OracleParameter
-                    {
-                        ParameterName = "in_faculty",
-                        Direction = ParameterDirection.Input,
-                        OracleDbType = OracleDbType.Varchar2,
-                        Value = _student.Faculty
-                    };
-                    OracleParameter specialization = new OracleParameter
-                    {
-                        ParameterName = "in_specialization",
-                        Direction = ParameterDirection.Input,
-                        OracleDbType = OracleDbType.Varchar2,
-                        Value = _student.Specialization
-                    };
-                    OracleParameter numGroup = new OracleParameter
-                    {
-                        ParameterName = "in_num_group",
-                        Direction = ParameterDirection.Input,
-                        OracleDbType = OracleDbType.Int64,
-                        Value = _student.Group
-                    };
-                    OracleParameter course = new OracleParameter
-                    {
-                        ParameterName = "in_course",
-                        Direction = ParameterDirection.Input,
-                        OracleDbType = OracleDbType.Int64,
-                        Value = _student.Course
-                    };
-                    GetInfoFromTables("select subject from subjects where faculty = :in_faculty","subject",p_subjectsComboBox,connection, new OracleParameter[] {faculty}, "Error when reading subjects");
-                    GetInfoFromTables("select student_name from student_info where specialization = :in_specialization and faculty = :in_faculty and num_group = :in_num_group " +
-                                      "and course = :in_course", "student_name",p_studentsComboBox,connection, new OracleParameter[] {faculty.Clone() as OracleParameter, specialization, numGroup,course}, message);
                     connection.Open();
+                    GetInfoFromTables("select subject from subjects where faculty = :in_faculty","subject",p_subjectsComboBox,connection, new OracleParameter[] {faculty}, "Error when reading subjects");
+                    GetInfoFromTables("select student_name from student_info where faculty = :in_faculty and specialization = :in_specialization and num_group = :in_num_group and course = :in_course", "student_name",p_studentsComboBox,connection, new [] {faculty.Clone() as OracleParameter, specialization, numGroup, course}, message);
                     connection.Close();
-                }
+                }// specialization = :in_specialization and and num_group = :in_num_group "and course = :in_course
 
                 foreach (var t in _university.countOfGaps) p_gapsComboBox.Items.Add(t);
 
@@ -108,7 +107,7 @@ namespace StudentHub
                 this.Close();
             }
         }
-        //TODO fix
+
         private void P_saveButton_OnClick(object sender, RoutedEventArgs e)
         {
             string setProgressProcedure = "SET_GAPS";
@@ -131,31 +130,46 @@ namespace StudentHub
 
             try
             {
-                using (SqlConnection connection = new SqlConnection(OracleDataBaseConnection.data))
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
                 {
-                    connection.Open();
-                    SqlCommand setProgressCommand = new SqlCommand(setProgressProcedure, connection);
-                    setProgressCommand.CommandType = CommandType.StoredProcedure;
-                    SqlParameter studentNameParameter = new SqlParameter
+                    OracleParameter studentName = new OracleParameter
                     {
-                        ParameterName = "@StudentName",
+                        ParameterName = "in_student_name",
+                        OracleDbType = OracleDbType.Varchar2,
+                        Direction = ParameterDirection.Input,
                         Value = p_studentsComboBox.Text
                     };
-                    SqlParameter subjectNameParameter = new SqlParameter
+                    OracleParameter subject = new OracleParameter
                     {
-                        ParameterName = "@SubjectName",
+                        ParameterName = "in_subject",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
                         Value = p_subjectsComboBox.Text
                     };
-                    SqlParameter noteParameter = new SqlParameter
+                    OracleParameter gaps = new OracleParameter
                     {
-                        ParameterName = "@Gaps",
-                        Value = Convert.ToInt32(p_gapsComboBox.Text)
+                        ParameterName = "in_gaps_count",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Int64,
+                        Value = int.Parse(p_gapsComboBox.Text)
                     };
-                    setProgressCommand.Parameters.Add(studentNameParameter);
-                    setProgressCommand.Parameters.Add(subjectNameParameter);
-                    setProgressCommand.Parameters.Add(noteParameter);
-                    var done = setProgressCommand.ExecuteScalar();
+                    OracleParameter gapsDate = new OracleParameter
+                    {
+                        ParameterName = "in_gap_date",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Date,
+                        Value = p_gapsCalendar.SelectedDate
+                    };
+                    connection.Open();
+                    using (OracleCommand command = new OracleCommand("setGaps", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddRange(new[] {studentName,subject,gaps,gapsDate});
+                        command.ExecuteNonQuery();
+                    }
+
                     MessageBox.Show("Done");
+                    connection.Close();
                 }
             }
             catch (Exception exception)

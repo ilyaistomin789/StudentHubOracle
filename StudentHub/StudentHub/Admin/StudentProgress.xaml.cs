@@ -12,6 +12,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Oracle.ManagedDataAccess.Client;
 using StudentHub.DataBase;
@@ -20,19 +21,19 @@ using StudentHub.University;
 namespace StudentHub.Admin
 {
     /// <summary>
-    /// Логика взаимодействия для GapsWorkWindow.xaml
+    /// Логика взаимодействия для StudentProgress.xaml
     /// </summary>
-    public partial class GapsWorkWindow : Window
+    public partial class StudentProgress : Page
     {
-        private Window _window;
         private Deanery _deanery;
-        public GapsWorkWindow(Deanery deanery)
+        public StudentProgress(Deanery deanery)
         {
             _deanery = deanery;
             InitializeComponent();
-            GetGaps();
+            GetStudentProgress();
         }
-        private void GetGaps()
+
+        private void GetStudentProgress()
         {
             try
             {
@@ -46,17 +47,14 @@ namespace StudentHub.Admin
                         Value = _deanery.Faculty
                     };
                     connection.Open();
-                    using (OracleCommand command = new OracleCommand("select s.student_name || ' ' || s.course || '-' || s.num_group student, g.subject, sum(g.gaps_count) count from gaps g " +
-                                                                     "inner join student_info s on g.user_id = s.user_id where s.faculty = :in_faculty " +
-                                                                     "group by s.student_name, s.course, s.num_group, g.subject", connection))
+                    using (OracleCommand command = new OracleCommand("select s.student_name || ' ' || s.course || '-' || s.num_group student, avg(sp.NOTE) from student_progress sp " +
+                                                                     "inner join student_info s on sp.user_id = s.user_id " +
+                                                                     "where s.faculty = :in_faculty " +
+                                                                     "group by s.student_name, s.course, s.num_group " +
+                                                                     "order by s.student_name", connection))
                     {
                         command.Parameters.Add(faculty);
                         command.ExecuteNonQuery();
-                        OracleDataAdapter oda = new OracleDataAdapter(command);
-                        DataTable dt = new DataTable("gaps");
-                        oda.Fill(dt);
-                        dg_Gaps.ItemsSource = dt.DefaultView;
-                        oda.Update(dt);
                     }
                     connection.Close();
                 }
@@ -64,10 +62,8 @@ namespace StudentHub.Admin
             catch (Exception e)
             {
                 MessageBox.Show(e.Message);
+                throw;
             }
         }
-
-
-        private void CloseStudentGapsButton_OnClick(object sender, RoutedEventArgs e) => this.Close();
     }
 }

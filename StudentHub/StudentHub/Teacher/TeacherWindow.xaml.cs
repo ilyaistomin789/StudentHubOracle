@@ -57,13 +57,13 @@ namespace StudentHub.Teacher
                 using (OracleCommand command = new OracleCommand("findTeacher", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddRange(new OracleParameter[] { userIdParameter, teacher });
+                    command.Parameters.AddRange(new [] { userIdParameter, teacher });
                     var reader = command.ExecuteReader();
                     DataTable dt = new DataTable();
                     dt.Load(reader);
                     foreach (DataRow row in dt.Rows)
                     {
-                        _teacher.UserId = int.Parse(row["use_id"].ToString());
+                        _teacher.UserId = int.Parse(row["user_id"].ToString());
                         _teacher.TeacherId = int.Parse(row["id"].ToString());
                         _teacher.Faculty = row["faculty"].ToString();
                         _teacher.Telephone = row["telephone"].ToString();
@@ -83,5 +83,23 @@ namespace StudentHub.Teacher
             this.Close();
         }
         private void ExitButton_OnClick(object sender, RoutedEventArgs e) => this.Close();
+
+        private void setRatingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            _window = new SetRatingsWindow(_teacher);
+            _window.Show();
+        }
+
+        private void AdjustmentWorkButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            _window = new AdjustmentActionWindow(_teacher);
+            _window.Show();
+        }
+
+        private void RetakeWorkButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            _window = new ViewRetakeWindow(_teacher);
+            _window.Show();
+        }
     }
 }

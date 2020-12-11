@@ -65,7 +65,8 @@
                 <TextBlock Text="{DynamicResource m_Welcome}" FontSize="30"/>
                 <TextBlock x:Name="deaneryTextBlock" FontSize="30"/>
             </StackPanel>
-            <StackPanel x:Name="reportStackPanel" Visibility="Collapsed">
+            <Frame x:Name="studentProgressFrame" Height="700" Visibility="Collapsed"/>
+            <!--<StackPanel x:Name="reportStackPanel" Visibility="Visible">
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Processed Adjustments: " Margin="5"/>
                     <TextBlock x:Name="processedAdjustments" Margin="5"/>
@@ -85,14 +86,14 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Count of authorized users: " Margin="5"/>
                     <TextBlock x:Name="countOfUsers" Margin="5"/>
-                </StackPanel>
-                <ScrollViewer>
+                </StackPanel>-->
+                <!--<ScrollViewer>
                     <DataGrid x:Name="dg_Students" AutoGenerateColumns="True" FontFamily="Helvetica" FontSize="16" FontWeight="Light"
                               BorderBrush="Transparent" HeadersVisibility="Column" CanUserResizeColumns="False" Margin="0,5,0,5"
                               CanUserResizeRows="False" Width="640" RowBackground="Transparent" Background="Transparent" VerticalGridLinesBrush="Transparent" HorizontalGridLinesBrush="Transparent" ColumnWidth="210" ColumnHeaderStyle="{StaticResource DataGridColumnHeader}" IsReadOnly="True">
                     </DataGrid>
                 </ScrollViewer>
-            </StackPanel>
+            </StackPanel>-->
             
         </StackPanel>
     </Grid>
