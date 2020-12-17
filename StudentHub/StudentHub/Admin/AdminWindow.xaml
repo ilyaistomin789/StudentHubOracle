@@ -40,12 +40,6 @@
                         <TextBlock Text="{DynamicResource admin_RetakeWork}"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="studentProgressButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Visibility="Visible" Click="StudentProgressButton_OnClick">
-                    <StackPanel>
-                        <Image/>
-                        <TextBlock Text="{DynamicResource admin_StudentProgress}"/>
-                    </StackPanel>
-                </Button>
                 <Button x:Name="logOutButton" HorizontalContentAlignment="Left" Style="{StaticResource LauncherButtons}" Height="50" Margin="3,10,3,0" Click="LogOutButton_OnClick">
                     <StackPanel>
                         <Image/>

@@ -48,7 +48,7 @@ namespace StudentHub.Admin
                         Value = _deanery.Faculty
                     };
                     connection.Open();
-                    using (OracleCommand command = new OracleCommand("select s.student_name,s.faculty,r.subject,r.status,TO_CHAR(r.retake_date, 'DD.MM.YYYY') retake_date, r.img " +
+                    using (OracleCommand command = new OracleCommand("select s.student_name,s.faculty,r.subject,r.status,TO_CHAR(r.retake_date, 'DD.MM.YYYY') retake_date " +
                                                                      "from retakes r inner join student_info s on r.user_id = s.user_id and s.faculty = :in_faculty", connection))
                     {
                         command.Parameters.Add(faculty);

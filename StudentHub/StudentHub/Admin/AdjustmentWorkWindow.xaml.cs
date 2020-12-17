@@ -215,5 +215,60 @@ namespace StudentHub.Admin
                 throw;
             }
         }
+
+        private void DeleteButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            string studentName = ((DataRowView)dg_Adjustments.SelectedItems[0]).Row["student_name"].ToString();
+            string subjectName = ((DataRowView)dg_Adjustments.SelectedItems[0]).Row["subject"].ToString();
+            string date = ((DataRowView)dg_Adjustments.SelectedItems[0]).Row["filing_date"].ToString();
+            if (subjectName == String.Empty)
+            {
+                MessageBox.Show("Please, choose row");
+                return;
+            }
+
+            try
+            {
+                using (OracleConnection connection = new OracleConnection(OracleDataBaseConnection.data))
+                {
+                    OracleParameter student = new OracleParameter
+                    {
+                        ParameterName = "in_student_name",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
+                        Value = studentName
+                    };
+                    OracleParameter subject = new OracleParameter
+                    {
+                        ParameterName = "in_subject",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Varchar2,
+                        Value = subjectName
+                    };
+                    OracleParameter filingDate = new OracleParameter
+                    {
+                        ParameterName = "in_filing_date",
+                        Direction = ParameterDirection.Input,
+                        OracleDbType = OracleDbType.Date,
+                        Value = DateTime.Parse(date)
+                    };
+                    connection.Open();
+                    using (OracleCommand command = new OracleCommand("deleteAdjustment", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddRange(new[] {student,subject,filingDate});
+                        command.ExecuteNonQuery();
+                    }
+
+                    MessageBox.Show("Done");
+                    connection.Close();
+                }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show(exception.Message);
+                throw;
+            }
+        }
     }
 }

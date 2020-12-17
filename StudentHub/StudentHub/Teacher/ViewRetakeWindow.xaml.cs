@@ -43,7 +43,7 @@ namespace StudentHub.Teacher
                         Value = _teacher.Faculty
                     };
                     connection.Open();
-                    using (OracleCommand command = new OracleCommand("select s.student_name || ' ' || s.course || '-' || s.num_group student,s.faculty,r.subject,r.status,r.retake_date " +
+                    using (OracleCommand command = new OracleCommand("select s.student_name || ' ' || s.course || '-' || s.num_group student,s.faculty,r.subject,r.status,TO_CHAR(r.retake_date, 'DD.MM.YYYY') retake_date " +
                                                                      "from retakes r inner join student_info s on r.user_id = s.user_id and s.faculty = :in_faculty", connection))
                     {
                         command.Parameters.Add(faculty);

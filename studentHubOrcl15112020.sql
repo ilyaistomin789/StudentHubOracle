@@ -2,9 +2,6 @@
 -- Globals
 ---
 
--- SQLINES DEMO *** AUTO_VALUE_ON_ZERO";
--- SQLINES DEMO *** HECKS=0;
-
 ---
 -- Table 'users'
 --
@@ -15,7 +12,7 @@ EXECUTE IMMEDIATE 'DROP TABLE users';
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE users (
 id NUMBER(10) DEFAULT NULL NULL,
@@ -35,7 +32,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT users_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-//
+
 
 
 --student info
@@ -68,7 +65,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT student_info_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 
 ---
@@ -81,7 +78,7 @@ EXECUTE IMMEDIATE 'DROP TABLE deanery_info';
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE deanery_info (
 id NUMBER(10) DEFAULT NULL NULL,
@@ -101,7 +98,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT deanery_info_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 BEGIN
 EXECUTE IMMEDIATE 'DROP TABLE teacher_info';
@@ -140,7 +137,7 @@ EXECUTE IMMEDIATE 'DROP TABLE student_progress';
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE
 student_progress (
@@ -161,7 +158,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT student_progress_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 ---
 -- Table 'subjects'
@@ -173,7 +170,7 @@ EXECUTE IMMEDIATE 'DROP TABLE subjects';
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE subjects (
 id number,
@@ -190,7 +187,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT subjects_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 
 ---
@@ -203,7 +200,7 @@ EXECUTE IMMEDIATE 'DROP TABLE faculty_specialization';
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE faculty_specialization (
 id number DEFAULT NULL NULL,
@@ -221,7 +218,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT faculty_specialization_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 ---
 -- Table 'faculty'
@@ -233,7 +230,7 @@ EXECUTE IMMEDIATE 'DROP TABLE faculty';
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE faculty (
 id number,
@@ -249,7 +246,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT faculty_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 ---
 -- SQLINES DEMO *** tion'
@@ -261,7 +258,7 @@ EXECUTE IMMEDIATE 'DROP TABLE specialization';
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE specialization (
 specialization VARCHAR2(20) DEFAULT NULL NULL,
@@ -277,7 +274,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT specialization_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 ---
 -- Table 'adjustments'
@@ -314,7 +311,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT adjustments_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 ---
 -- Table 'retakes'
@@ -326,7 +323,7 @@ EXECUTE IMMEDIATE 'DROP TABLE retakes';
 EXCEPTION
 WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE retakes (
 id NUMBER(10) DEFAULT NULL NULL,
@@ -347,7 +344,7 @@ WHEN (NEW.id IS NULL)
 BEGIN
 SELECT retakes_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 -- ---
 -- Table 'gaps'
 --
@@ -358,7 +355,7 @@ BEGIN
 EXCEPTION
    WHEN OTHERS THEN NULL;
 END;
-/
+
 
 CREATE TABLE gaps (
   id NUMBER(10) DEFAULT NULL NULL,
@@ -378,7 +375,7 @@ CREATE OR REPLACE TRIGGER gaps_seq_tr
 BEGIN
  SELECT gaps_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 ---
 -- Table 'Timetable'
 ---
@@ -386,7 +383,7 @@ BEGIN
    EXECUTE IMMEDIATE 'DROP TABLE gaps';
 EXCEPTION
    WHEN OTHERS THEN NULL;
-END;/
+END;
 
 CREATE TABLE timetable (
   id NUMBER(10) DEFAULT NULL NULL,
@@ -405,7 +402,7 @@ CREATE OR REPLACE TRIGGER timetable_seq_tr
 BEGIN
  SELECT timetable_seq.NEXTVAL INTO :NEW.id FROM DUAL;
 END;
-/
+
 
 -- ---
 -- Foreign Keys
@@ -465,9 +462,7 @@ SELECT COUNT(*) into check_count from users where login = in_login and password 
     when invalid_user then
     RAISE_APPLICATION_ERROR(-20005, 'Please, check that the information you entered is correct');
 end findUser;
-select *
-from users;
-commit;
+
 CREATE or replace PROCEDURE addUser(in_login in users.login%TYPE, in_password in users.password%TYPE)
 IS
 user_exists number;
@@ -479,7 +474,8 @@ encode_pass raw(2000);
 begin
     encode_mode := DBMS_CRYPTO.ENCRYPT_AES128 + DBMS_CRYPTO.CHAIN_CBC + DBMS_CRYPTO.PAD_PKCS5;
     SELECT COUNT(*) into user_exists from users where users.login = in_login;
-    encode_pass := DBMS_CRYPTO.ENCRYPT(utl_i18n.string_to_raw (in_password, 'AL32UTF8'), encode_mode, utl_i18n.string_to_raw (encode_key, 'AL32UTF8'));
+    encode_pass := DBMS_CRYPTO.ENCRYPT(utl_i18n.string_to_raw (in_password, 'AL32UTF8'),
+        encode_mode, utl_i18n.string_to_raw (encode_key, 'AL32UTF8'));
 
     if user_exists != 0 then raise curr_user_exists;
         else insert into users (login,password,role) values (in_login,encode_pass,'student');
@@ -490,7 +486,7 @@ begin
     when curr_user_exists then
     raise_application_error(-20000, 'This user is exists');
 end addUser;
-    select * from users;
+
 CREATE OR REPLACE PROCEDURE addEmptyStudent(in_id in users.id%TYPE)
 IS
 begin
@@ -524,7 +520,8 @@ begin
 end updateStudent;
 
 
-create or replace procedure addAdjustment(in_user_id users.id%type, in_teacher_name teacher_info.teacher_name%type, in_subject subjects.subject%type, in_filing_date
+create or replace procedure addAdjustment(in_user_id users.id%type, in_teacher_name teacher_info.teacher_name%type,
+in_subject subjects.subject%type, in_filing_date
 adjustments.filing_date%type, in_img blob)
 IS
     curr_teacher_id number;
@@ -532,7 +529,9 @@ IS
     adjustment_exists exception;
 BEGIN
     SELECT user_id into curr_teacher_id from teacher_info where teacher_name = in_teacher_name;
-        SELECT count(*) into check_adj from adjustments where user_id = in_user_id and teacher_id = curr_teacher_id and subject = in_subject and filing_date = in_filing_date;
+        SELECT count(*) into check_adj from adjustments where user_id = in_user_id and
+                                                              teacher_id = curr_teacher_id
+                                                          and subject = in_subject and filing_date = in_filing_date;
     if check_adj = 0 then
     insert into adjustments(user_id, teacher_id, subject, status, filing_date, img) values(in_user_id, curr_teacher_id,
                                                                                            in_subject, 'in processing',in_filing_date,in_img);
@@ -541,9 +540,9 @@ BEGIN
     end if;
     exception when adjustment_exists then RAISE_APPLICATION_ERROR(-20001, 'This Adjustment is exists');
 end;
-    select * from adjustments;
 
-create or replace procedure addRetake(in_user_id users.id%type, in_teacher_name teacher_info.teacher_name%type, in_subject subjects.subject%type, in_retake_date
+create or replace procedure addRetake(in_user_id users.id%type,
+in_teacher_name teacher_info.teacher_name%type, in_subject subjects.subject%type, in_retake_date
 retakes.retake_date%type, in_img blob)
 IS
     curr_teacher_id number;
@@ -551,7 +550,8 @@ IS
     retake_exists exception;
 BEGIN
     SELECT user_id into curr_teacher_id from teacher_info where teacher_name = in_teacher_name;
-        SELECT count(*) into check_ret from retakes where user_id = in_user_id and teacher_id = curr_teacher_id and subject = in_subject and retake_date = in_retake_date;
+        SELECT count(*) into check_ret from retakes where user_id = in_user_id and
+                                                          teacher_id = curr_teacher_id and subject = in_subject and retake_date = in_retake_date;
     if check_ret = 0 then
     insert into retakes(user_id, teacher_id, subject, status, retake_date, img) values(in_user_id, curr_teacher_id,
                                                                                            in_subject, 'in processing',in_retake_date,in_img);
@@ -593,11 +593,6 @@ begin
     select user_id into student_id from student_info where student_name = in_student_name;
     insert into gaps (user_id, subject, gap_date, GAPS_COUNT) values (student_id, in_subject, in_gap_date, in_gaps_count);
 end setGaps;
-
-    select * from adjustments;
-select s.student_name || ' ' || s.course || '-' || s.num_group student, g.subject, sum(g.gaps_count) count from gaps g
-                                                                     inner join student_info s on g.user_id = s.user_id where s.faculty = :in_faculty
-                                                                     group by s.student_name, s.course, s.num_group, g.subject;
 
 create or replace procedure accept_decline_Adjustment(in_student_name student_info.student_name%type, in_subject subjects.subject%type,
 in_filing_date adjustments.filing_date%type, action boolean)
@@ -660,6 +655,16 @@ end accept_decline_Adjustment_Teacher;
     select * from student_info;
 select a.img from adjustments a inner join student_info s on a.user_id = s.user_id where
 s.student_name = :in_student_name and s.faculty = :in_faculty and a.subject = :in_subject;
+
+create or replace procedure deleteAdjustment(in_student_name student_info.student_name%type, in_subject subjects.subject%type,
+in_filing_date adjustments.filing_date%type)
+is
+    curr_user_id users.id%type;
+begin
+    select user_id into curr_user_id from student_info where student_name = in_student_name;
+    delete adjustments where user_id = curr_user_id and subject = in_subject and filing_date = in_filing_date;
+    commit;
+end;
 -- ----
 -- GENERATE
 -- ----
@@ -679,8 +684,131 @@ end generateUsers;
 begin
 generateUsers;
 end;
-select * from student_info;
--- do xml
+
+-- ----
+-- XML
+-- ----
+
+CREATE OR REPLACE DIRECTORY UTLDATA AS 'A:/XML';
+DROP DIRECTORY UTLDATA;
+
+
+CREATE OR REPLACE PACKAGE XML_PACKAGE IS
+  PROCEDURE EXPORT_USERS_TO_XML;
+  PROCEDURE IMPORT_USERS_FROM_XML;
+END XML_PACKAGE;
+
+CREATE OR REPLACE PACKAGE BODY XML_PACKAGE IS
+
+PROCEDURE EXPORT_USERS_TO_XML
+IS
+  DOC  DBMS_XMLDOM.DOMDocument;
+  XDATA  XMLTYPE;
+  CURSOR XMLCUR IS
+    SELECT XMLELEMENT("USERS",
+      XMLAttributes('http://www.w3.org/2001/XMLSchema' AS "xmlns:xsi",
+      'http://www.oracle.com/Employee.xsd' AS "xsi:nonamespaceSchemaLocation"),
+      XMLAGG(XMLELEMENT("USER",
+        XMLELEMENT("ID",U.ID),
+        XMLELEMENT("LOGIN",U.LOGIN),
+        XMLELEMENT("PASSWORD",U.PASSWORD),
+        XMLELEMENT("ROLE",U.ROLE)
+      ))
+) FROM USERS U;
+BEGIN
+  OPEN XMLCUR;
+    LOOP
+      FETCH XMLCUR INTO XDATA;
+    EXIT WHEN XMLCUR%NOTFOUND;
+    END LOOP;
+  CLOSE XMLCUR;
+  DOC := DBMS_XMLDOM.NewDOMDocument(XDATA);
+  DBMS_XMLDOM.WRITETOFILE(DOC, 'UTLDATA/users.xml');
+END EXPORT_USERS_TO_XML;
+
+PROCEDURE IMPORT_USERS_FROM_XML
+IS
+  L_CLOB CLOB;
+  L_BFILE  BFILE := BFILENAME('UTLDATA', 'users.xml');
+
+  L_DEST_OFFSET   INTEGER := 1;
+  L_SRC_OFFSET    INTEGER := 1;
+  L_BFILE_CSID    NUMBER  := 0;
+  L_LANG_CONTEXT  INTEGER := 0;
+  L_WARNING       INTEGER := 0;
+
+  P                DBMS_XMLPARSER.PARSER;
+  V_DOC            DBMS_XMLDOM.DOMDOCUMENT;
+  V_ROOT_ELEMENT   DBMS_XMLDOM.DOMELEMENT;
+  V_CHILD_NODES    DBMS_XMLDOM.DOMNODELIST;
+  V_CURRENT_NODE   DBMS_XMLDOM.DOMNODE;
+
+  U USERS%ROWTYPE;
+BEGIN
+  DBMS_LOB.CREATETEMPORARY (L_CLOB, TRUE);
+  DBMS_LOB.FILEOPEN(L_BFILE, DBMS_LOB.FILE_READONLY);
+
+  DBMS_LOB.LOADCLOBFROMFILE (DEST_LOB => L_CLOB, SRC_BFILE => L_BFILE, AMOUNT => DBMS_LOB.LOBMAXSIZE,
+    DEST_OFFSET => L_DEST_OFFSET, SRC_OFFSET => L_SRC_OFFSET, BFILE_CSID => L_BFILE_CSID,
+    LANG_CONTEXT => L_LANG_CONTEXT, WARNING => L_WARNING);
+  DBMS_LOB.FILECLOSE(L_BFILE);
+  COMMIT;
+
+   P := DBMS_XMLPARSER.NEWPARSER;
+
+   DBMS_XMLPARSER.PARSECLOB(P,L_CLOB);
+
+   V_DOC := DBMS_XMLPARSER.GETDOCUMENT(P);
+
+   V_ROOT_ELEMENT := DBMS_XMLDOM.Getdocumentelement(v_Doc);
+
+   V_CHILD_NODES := DBMS_XMLDOM.GETCHILDRENBYTAGNAME(V_ROOT_ELEMENT,'*');
+
+   FOR i IN 0 .. DBMS_XMLDOM.GETLENGTH(V_CHILD_NODES) - 1
+   LOOP
+
+      V_CURRENT_NODE := DBMS_XMLDOM.ITEM(V_CHILD_NODES,i);
+
+      DBMS_XSLPROCESSOR.VALUEOF(V_CURRENT_NODE,
+        'ID/text()',U.ID);
+      DBMS_XSLPROCESSOR.VALUEOF(V_CURRENT_NODE,
+        'LOGIN/text()',U.LOGIN);
+      DBMS_XSLPROCESSOR.VALUEOF(V_CURRENT_NODE,
+        'PASSWORD/text()',U.PASSWORD);
+      DBMS_XSLPROCESSOR.VALUEOF(V_CURRENT_NODE,
+        'ROLE/text()',U.ROLE);
+
+      INSERT INTO USERS(id, login, password, role)
+        VALUES(u.id,u.login,u.password,u.role) ;
+   END LOOP;
+
+  DBMS_LOB.FREETEMPORARY(L_CLOB);
+  DBMS_XMLPARSER.FREEPARSER(P);
+  DBMS_XMLDOM.FREEDOCUMENT(V_DOC);
+  COMMIT;
+EXCEPTION
+  WHEN OTHERS THEN
+  DBMS_LOB.FREETEMPORARY(L_CLOB);
+  DBMS_XMLPARSER.FREEPARSER(P);
+  DBMS_XMLDOM.FREEDOCUMENT(V_DOC);
+  RAISE_APPLICATION_ERROR(-20101, 'IMPORT XML ERROR'|| SQLERRM);
+END IMPORT_USERS_FROM_XML;
+
+END XML_PACKAGE;
+
+declare
+begin
+    XML_PACKAGE.EXPORT_USERS_TO_XML();
+    --XML_PACKAGE.IMPORT_USERS_FROM_XML();
+end;
+
+-- ----
+-- INDEXES
+-- ----
+
+create index userid_student on student_info(user_id);
+create index teacher_name_index on teacher_info(teacher_name);
+
 -- ----
 -- INSERTS
 -- ----
@@ -765,3 +893,18 @@ insert all
 	into faculty_specialization(specialization, faculty) values	('ХТПД','ТОВ')
 	into faculty_specialization(specialization, faculty) values	('ФХМиПККП','ТОВ')
 	select * from dual;
+
+
+select * from users;
+select * from teacher_info;
+select * from student_info;
+select * from student_progress;
+select * from deanery_info;
+select * from adjustments;
+select * from retakes;
+select * from subjects;
+select * from faculty;
+select * from gaps;
+select * from specialization;
+select * from faculty_specialization;
+

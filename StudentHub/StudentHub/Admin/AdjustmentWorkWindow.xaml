@@ -41,7 +41,8 @@
             <Button x:Name="imageButton" Content="{DynamicResource admin_GetImage}" Style="{StaticResource MainButtons}" Background="#FF33EA54" Width="170" Height="40" Margin="5" Click="ImageButton_OnClick"/>
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button x:Name="acceptButton" Content="{DynamicResource admin_Accept}" Style="{StaticResource MainButtons}" Background="#FF33EA33" Width="100" Height="40" Margin="5" Click="AcceptButton_OnClick"/>
-                <Button  x:Name="declineButton"  Content="{DynamicResource admin_Decline}" Style="{StaticResource MainButtons}" Background="#FFF04747" Width="100" Height="40" Margin="5" Click="DeclineButton_OnClick"/>
+                <Button  x:Name="declineButton"  Content="{DynamicResource admin_Decline}" Style="{StaticResource MainButtons}" Background="#FFF047CA" Width="100" Height="40" Margin="5" Click="DeclineButton_OnClick"/>
+                <Button  x:Name="deleteButton"  Content="{DynamicResource admin_Delete}" Style="{StaticResource MainButtons}" Background="#FFF04747" Width="100" Height="40" Margin="5" Click="DeleteButton_OnClick"/>
             </StackPanel>
         </StackPanel>
     </Grid>

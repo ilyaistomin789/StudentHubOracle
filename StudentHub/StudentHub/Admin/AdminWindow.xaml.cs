@@ -123,7 +123,6 @@ namespace StudentHub
         }
 
         private void ExitButton_OnClick(object sender, RoutedEventArgs e) => this.Close();
-
-
     }
 }
+    

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using StudentHub.University;
 
 namespace StudentHub
@@ -16,7 +17,7 @@ namespace StudentHub
             s_specializationTextBlock.Text = student.Specialization;
             s_courseTextBlock.Text = student.Course.ToString();
             s_groupTextBlock.Text = student.Group.ToString();
-            s_birthdayTextBlock.Text = student.Birthday;
+            s_birthdayTextBlock.Text = DateTime.Parse(student.Birthday).ToString("D");
             s_emailTextBlock.Text = student.Email;
         }
     }
